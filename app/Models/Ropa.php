@@ -57,5 +57,11 @@ class Ropa extends Model
         return $this->hasMany(Review::class);
     }
 
+     public function riskScores()
+    {
+        return $this->hasMany(RiskScore::class);
+    }
+
+
 
 }

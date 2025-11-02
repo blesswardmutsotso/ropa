@@ -86,6 +86,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
    // Review  route 
   Route::resource('reviews', ReviewController::class);
 
+  // Risk Score 
+
+  Route::resource('risk_scores', RiskScoreController::class);
+
 });
 
 
