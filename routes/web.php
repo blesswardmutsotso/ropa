@@ -16,9 +16,10 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard', [DashboardController::class, 'dashboard'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
 
@@ -46,10 +47,14 @@ Route::get('/admin', [DashboardController::class, 'admin'])->name('admin');
 Route::get('/account/edit', [DashboardController::class, 'edit'])->name('account.edit');
 Route::patch('/account', [DashboardController::class, 'update'])->name('account.update');
 
- // ROPA resource routes
-    Route::resource('ropa', RopaController::class);
 
 });
+
+
+
+// ROPA resource routes
+Route::resource('ropa', RopaController::class);
+
 
 
 
@@ -110,8 +115,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     ->name('admin.users.show');
 
 
-   // Review  route 
-  Route::resource('reviews', ReviewController::class);
+  
 
   // Risk Score 
 
@@ -140,7 +144,8 @@ Route::get('/activities/export', [UserActivityController::class, 'export'])->nam
 
  Route::get('/ropa/{id}/print', [RopaController::class, 'print'])->name('ropa.print'); Route::patch('/profile/2fa-toggle', [ProfileController::class, 'toggleTwoFactor'])->name('2fa.toggle');
 
-
+ // Review  route 
+  Route::resource('reviews', ReviewController::class);
 
 
 require __DIR__.'/auth.php';

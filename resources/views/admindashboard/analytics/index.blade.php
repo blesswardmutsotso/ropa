@@ -6,22 +6,24 @@
 <div class="container mx-auto p-4 sm:p-6">
     <!-- Page Header & Filter -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
-        <h2 class="text-3xl font-bold text-indigo-700 flex items-center mb-4 sm:mb-0">
+        <h2 class="text-3xl font-bold text-orange-500 flex items-center mb-4 sm:mb-0">
             <i data-feather="bar-chart-2" class="w-6 h-6 mr-2"></i> Risk Analytics Overview
         </h2>
 
         <!-- Filter Form -->
         <form method="GET" action="{{ route('admin.analytics') }}" class="flex flex-col sm:flex-row items-center gap-2">
-            <select name="department" class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-indigo-500">
+            <select name="department" class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-orange-500">
                 <option value="">All Departments</option>
                 <option value="HR" @if(request('department')=='HR') selected @endif>HR</option>
                 <option value="Finance" @if(request('department')=='Finance') selected @endif>Finance</option>
                 <option value="IT" @if(request('department')=='IT') selected @endif>IT</option>
             </select>
 
-            <input type="month" name="month" value="{{ request('month') }}" class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-indigo-500" />
+            <input type="month" name="month" value="{{ request('month') }}" 
+                   class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-orange-500" />
 
-            <button type="submit" class="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm sm:text-base">
+            <button type="submit" 
+                    class="flex items-center bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition text-sm sm:text-base">
                 <i data-feather="filter" class="w-4 h-4 mr-1"></i> Filter
             </button>
         </form>
@@ -34,7 +36,7 @@
                 ['title'=>'High Risk', 'value'=>$highRisk ?? 25, 'icon'=>'alert-triangle', 'color'=>'red'],
                 ['title'=>'Medium Risk', 'value'=>$mediumRisk ?? 40, 'icon'=>'alert-circle', 'color'=>'yellow'],
                 ['title'=>'Low Risk', 'value'=>$lowRisk ?? 35, 'icon'=>'check-circle', 'color'=>'green'],
-                ['title'=>'Total Records', 'value'=>$totalRecords ?? 200, 'icon'=>'database', 'color'=>'indigo'],
+                ['title'=>'Total Records', 'value'=>$totalRecords ?? 200, 'icon'=>'database', 'color'=>'orange'],
             ];
         @endphp
 
@@ -50,6 +52,7 @@
             </div>
         @endforeach
     </div>
+
 <!-- Risk Distribution Chart -->
 <div class="bg-white shadow-lg rounded-xl p-6 mb-6">
     <h3 class="text-lg font-bold mb-4 text-gray-700 flex items-center">
@@ -65,7 +68,7 @@
 
         <!-- Summary Stats -->
         <div class="flex flex-col space-y-3 text-gray-700">
-            <div class="flex justify-between items-center bg-orange-50 border-l-4 border-blue-500 rounded-lg p-3">
+            <div class="flex justify-between items-center bg-orange-50 border-l-4 border-orange-500 rounded-lg p-3">
                 <span class="font-semibold">Total Records:</span>
                 <span class="text-gray-800 font-bold">{{ $totalRecords }}</span>
             </div>
@@ -83,25 +86,27 @@
     </div>
 </div>
 
-
     <!-- ROPA Records Table -->
     <div class="bg-white shadow-lg rounded-xl p-6 mb-6">
         <h3 class="text-lg font-bold mb-4 text-gray-700 flex items-center">
-            <i data-feather="file-text" class="w-5 h-5 mr-2 text-indigo-600"></i> Submitted ROPA Records
+            <i data-feather="file-text" class="w-5 h-5 mr-2 text-orange-500"></i> Submitted ROPA Records
         </h3>
 
         <!-- Top Toolbar -->
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
             <div class="flex gap-2 items-center">
-                <input type="text" id="searchBox" placeholder="Search..." class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="searchBox" placeholder="Search..." 
+                       class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-orange-500">
                 
-                <select id="statusFilter" class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-indigo-500">
+                <select id="statusFilter" 
+                        class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-orange-500">
                     <option value="">All Status</option>
                     <option value="Approved">Approved</option>
                     <option value="Pending">Pending</option>
                 </select>
 
-                <select id="departmentFilter" class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-indigo-500">
+                <select id="departmentFilter" 
+                        class="px-3 py-2 border rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-orange-500">
                     <option value="">All Departments</option>
                     <option value="HR">HR</option>
                     <option value="Finance">Finance</option>
@@ -110,10 +115,12 @@
             </div>
 
             <div class="flex gap-2">
-                <button id="exportCsv" class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
+                <button id="exportCsv" 
+                        class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm sm:text-base">
                     <i data-feather="file-text" class="w-4 h-4 mr-1"></i> Export CSV
                 </button>
-                <button id="exportPdf" class="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm sm:text-base">
+                <button id="exportPdf" 
+                        class="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm sm:text-base">
                     <i data-feather="file-text" class="w-4 h-4 mr-1"></i> Export PDF
                 </button>
             </div>
@@ -121,7 +128,7 @@
 
         <div class="overflow-x-auto">
             <table id="ropasTable" class="min-w-full table-auto border-collapse text-sm sm:text-base">
-                <thead class="bg-indigo-700 text-white">
+                <thead class="bg-orange-600 text-white">
                     <tr>
                         <th class="py-3 px-4 text-left">Organisation</th>
                         <th class="py-3 px-4 text-left">Department</th>
@@ -174,9 +181,9 @@
                 label: 'Risk Levels',
                 data: [{{ $highRisk ?? 25 }}, {{ $mediumRisk ?? 40 }}, {{ $lowRisk ?? 35 }}],
                 backgroundColor: [
-                    'rgba(220, 38, 38, 0.7)', // High Risk
-                    'rgba(234, 179, 8, 0.7)', // Medium Risk
-                    'rgba(22, 163, 74, 0.7)'  // Low Risk
+                    'rgba(220, 38, 38, 0.7)',
+                    'rgba(234, 179, 8, 0.7)',
+                    'rgba(22, 163, 74, 0.7)'
                 ],
                 borderColor: [
                     'rgba(220, 38, 38, 1)',
@@ -193,7 +200,7 @@
                 datalabels: {
                     color: '#fff',
                     font: { weight: 'bold', size: 14 },
-                    formatter: (value, ctx) => value + '%'
+                    formatter: (value) => value + '%'
                 },
                 legend: {
                     display: true,
@@ -203,13 +210,6 @@
                         pointStyle: 'circle',
                         padding: 20,
                         font: { size: 14, weight: 'bold' }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.label + ': ' + context.raw + '%';
-                        }
                     }
                 }
             }
@@ -222,21 +222,17 @@
         var table = $('#ropasTable').DataTable({
             responsive: true,
             pageLength: 10,
-            ordering: true,
-            columnDefs: [{ orderable: false, targets: 4 }] // Disable sorting on Status
+            ordering: true
         });
 
-        // Global search box
         $('#searchBox').on('keyup', function() {
             table.search(this.value).draw();
         });
 
-        // Department filter
         $('#departmentFilter').on('change', function() {
             table.column(1).search(this.value).draw();
         });
 
-        // Status filter
         $('#statusFilter').on('change', function() {
             table.column(4).search(this.value).draw();
         });

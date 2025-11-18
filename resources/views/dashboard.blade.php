@@ -13,6 +13,7 @@
             <span class="font-bold text-xl text-gray-800 dark:text-gray-100">Dashboard</span>
         </div>
 
+
         <!-- Right: Notification + User Dropdown -->
         <div class="flex items-center space-x-6">
             <!-- Notification -->
@@ -29,6 +30,8 @@
                 </div>
             </div>
 
+
+            
             <!-- User Dropdown -->
             <div class="relative">
                 <button id="userMenuButton" class="flex items-center space-x-2 focus:outline-none">
@@ -55,6 +58,8 @@
     </div>
 </nav>
 
+
+
 <!-- Main Dashboard -->
 <div class="container mx-auto py-6">
 
@@ -66,11 +71,29 @@
 
     <!-- 4 Statistic Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        @php
-            $userRopaCount = \App\Models\Ropa::where('user_id', Auth::id())->count();
-            $pendingRopaCount = \App\Models\Ropa::where('user_id', Auth::id())->where('status', \App\Models\Ropa::STATUS_PENDING)->count();
-            $reviewedRopaCount = \App\Models\Ropa::where('user_id', Auth::id())->where('status', \App\Models\Ropa::STATUS_REVIEWED)->count();
-        @endphp
+       @php
+    $userId = Auth::id();
+
+    // Total records for this user
+    $userRopaCount = \App\Models\Ropa::where('user_id', $userId)->count();
+
+    // Pending ROPA
+    $pendingRopaCount = \App\Models\Ropa::where('user_id', $userId)
+        ->where('status', \App\Models\Ropa::STATUS_PENDING)
+        ->count();
+
+    // Reviewed ROPA
+    $reviewedRopaCount = \App\Models\Ropa::where('user_id', $userId)
+        ->where('status', \App\Models\Ropa::STATUS_REVIEWED)
+        ->count();
+
+    // Overdue = pending + older than 7 days
+    $overdueReviews = \App\Models\Ropa::where('user_id', $userId)
+        ->where('status', \App\Models\Ropa::STATUS_PENDING)
+        ->where('date_submitted', '<=', now()->subDays(1))
+        ->count();
+@endphp
+
 
         <!-- Total ROPA Records -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition flex items-center space-x-4 border-l-4 border-orange-500">
@@ -91,13 +114,14 @@
         </div>
 
         <!-- Overdue Reviews -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition flex items-center space-x-4 border-l-4 border-red-500">
-            <i data-feather="alert-circle" class="w-10 h-10 text-red-500"></i>
-            <div>
-                <div class="text-lg font-semibold">Overdue Reviews</div>
-                <div class="mt-2 text-3xl font-bold">0</div>
-            </div>
-        </div>
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition flex items-center space-x-4 border-l-4 border-red-500">
+    <i data-feather="alert-circle" class="w-10 h-10 text-red-500"></i>
+    <div>
+        <div class="text-lg font-semibold">Overdue Reviews</div>
+        <div class="mt-2 text-3xl font-bold">{{ $overdueReviews }}</div>
+    </div>
+</div>
+
 
         <!-- Tasks Completed -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition flex items-center space-x-4 border-l-4 border-green-500">
@@ -111,39 +135,73 @@
 
     <!-- Two Cards Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Risk Distribution Card -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
+    <h2 class="text-xl font-bold mb-4 flex items-center text-orange-500">
+        <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-orange-500"></i> Risk Distribution
+    </h2>
 
-        <!-- Risk Distribution Card -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-orange-500">
-                <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-orange-500"></i> Risk Distribution
-            </h2>
-
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                        <span class="font-semibold text-red-600">High Risk</span>
-                    </div>
-                    <div><span class="font-bold text-red-600">0</span> (0%)</div>
+    <div class="space-y-4">
+        <!-- Critical Risk -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center gap-2">
+                    <i data-feather="alert-triangle" class="w-4 h-4 text-red-700"></i>
+                    <span class="font-semibold text-red-700">Critical Risk</span>
                 </div>
-
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                        <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
-                        <span class="font-semibold text-yellow-600">Medium Risk</span>
-                    </div>
-                    <div><span class="font-bold text-yellow-600">1</span> (8%)</div>
-                </div>
-
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                        <span class="font-semibold text-green-600">Low Risk</span>
-                    </div>
-                    <div><span class="font-bold text-green-600">2</span> (17%)</div>
-                </div>
+                <div><span class="font-bold text-red-700">0</span> (0%)</div>
+            </div>
+            <div class="w-full bg-red-100 h-2 rounded-full">
+                <div class="bg-red-700 h-2 rounded-full" style="width: 0%"></div>
             </div>
         </div>
+
+        <!-- High Risk -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center gap-2">
+                    <i data-feather="alert-circle" class="w-4 h-4 text-red-600"></i>
+                    <span class="font-semibold text-red-600">High Risk</span>
+                </div>
+                <div><span class="font-bold text-red-600">0</span> (0%)</div>
+            </div>
+            <div class="w-full bg-red-100 h-2 rounded-full">
+                <div class="bg-red-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Medium Risk -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center gap-2">
+                    <i data-feather="alert-octagon" class="w-4 h-4 text-yellow-600"></i>
+                    <span class="font-semibold text-yellow-600">Medium Risk</span>
+                </div>
+                <div><span class="font-bold text-yellow-600">1</span> (8%)</div>
+            </div>
+            <div class="w-full bg-yellow-100 h-2 rounded-full">
+                <div class="bg-yellow-600 h-2 rounded-full" style="width: 8%"></div>
+            </div>
+        </div>
+
+        <!-- Low Risk -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center gap-2">
+                    <i data-feather="check-circle" class="w-4 h-4 text-green-600"></i>
+                    <span class="font-semibold text-green-600">Low Risk</span>
+                </div>
+                <div><span class="font-bold text-green-600">2</span> (17%)</div>
+            </div>
+            <div class="w-full bg-green-100 h-2 rounded-full">
+                <div class="bg-green-600 h-2 rounded-full" style="width: 17%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
         <!-- Recent ROPA Submissions -->
         <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
@@ -162,21 +220,27 @@
                 @forelse ($recentRopas as $ropa)
                     <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-l-4 border-orange-500">
                         <div class="flex justify-between mb-1">
-                            <span class="font-semibold">{{ $ropa->organisation_name ?? 'Unnamed Submission' }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-1">
-                                <i data-feather="clock" class="w-4 h-4 text-orange-500"></i>
-                                {{ $ropa->date_submitted 
-                                    ? $ropa->date_submitted->format('d/m/Y • h:i A') 
-                                    : 'N/A' }}
-                            </span>
+                           <span class="font-semibold">
+    {{ $ropa->ropa_create['organisation_name'] ?? $ropa->ropa_create['other_organisation_name'] ?? 'Unnamed Submission' }}
+</span>
+
+<span class="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-1">
+    <i data-feather="clock" class="w-4 h-4 text-orange-500"></i>
+    {{ $ropa->created_at
+        ? $ropa->created_at->format('d/m/Y • h:i A')
+        : 'N/A' }}
+</span>
+
+
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">
-                            {{ $ropa->department_name ?? 'Unknown Dept' }} • 
-                            {{ $ropa->user->name ?? 'N/A' }} — 
-                            <span class="font-semibold {{ $ropa->status === 'reviewed' ? 'text-green-600' : 'text-yellow-600' }}">
-                                {{ ucfirst($ropa->status ?? 'Pending') }}
-                            </span>
-                        </p>
+<p class="text-sm text-gray-600 dark:text-gray-300">
+    {{ $ropa->ropa_create['department_name'] ?? 'Unknown Dept' }} • 
+    {{ $ropa->user->name ?? 'N/A' }} — 
+    <span class="font-semibold {{ strtolower($ropa->status) === 'reviewed' ? 'text-green-600' : 'text-yellow-600' }}">
+        {{ ucfirst($ropa->status ?? 'Pending') }}
+    </span>
+</p>
+
                     </div>
                 @empty
                     <p class="text-sm text-gray-600 dark:text-gray-400 text-center">

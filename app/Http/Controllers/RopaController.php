@@ -3,232 +3,254 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ropa;
-use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RopaController extends Controller
 {
-    // Require authentication
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Display a listing of the resource with filtering/searching
+     * Display ROPA records for the logged-in user.
      */
-   public function index(Request $request)
-{
-    $search = $request->input('search');
-    $department = $request->input('department');
-    $month = $request->input('month');
+    public function index(Request $request)
+    {
+        try {
+            $search = $request->input('search');
 
-    $ropas = Ropa::with('user')
-        ->where('user_id', auth()->id()) // ✅ Only fetch records for logged-in user
-        ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('organisation_name', 'like', "%{$search}%")
-                  ->orWhere('department_name', 'like', "%{$search}%")
-                  ->orWhere('other_department', 'like', "%{$search}%")
-                  ->orWhere('status', 'like', "%{$search}%");
-            });
-        })
-        ->when($department, fn($query, $department) =>
-            $query->where('department_name', $department)
-        )
-        ->when($month, fn($query, $month) =>
-            $query->whereMonth('date_submitted', date('m', strtotime($month)))
-                  ->whereYear('date_submitted', date('Y', strtotime($month)))
-        )
-        ->orderBy('date_submitted', 'desc')
-        ->paginate(10);
+            $ropas = Ropa::with('user')
+                ->where('user_id', auth()->id())
+                ->when($search, function ($query, $search) {
+                    $query->whereJsonContains('ropa_create->organisation_name', $search)
+                          ->orWhereJsonContains('ropa_create->department_name', $search)
+                          ->orWhereJsonContains('ropa_create->other_department', $search)
+                          ->orWhereJsonContains('ropa_create->status', $search);
+                })
+                ->orderByDesc('created_at')
+                ->paginate(10);
 
-    return view('ropa.index', compact('ropas'));
-}
+            return view('ropa.index', compact('ropas'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching ROPA records', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Failed to load ROPA records. Please try again.');
+        }
+    }
 
     /**
-     * Show the form for creating a new resource
+     * Show the form to create a new ROPA.
      */
     public function create()
     {
-        $lawfulOptions = $this->getLawfulBasisOptions();
-        $personalDataOptions = $this->getPersonalDataCategories();
-        return view('ropa.create', compact('lawfulOptions', 'personalDataOptions'));
+        try {
+            return view('ropa.create', [
+                'lawfulOptions' => $this->getLawfulBasisOptions(),
+                'personalDataOptions' => $this->getPersonalDataCategories(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error showing ROPA create form', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Failed to open ROPA form. Please try again.');
+        }
     }
 
     /**
-     * Store a newly created resource in storage
+     * Store a new ROPA record.
      */
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'status' => 'nullable|string|in:Pending,Reviewed',
-            'date_submitted' => 'nullable|date',
-            'other_specify' => 'nullable|string|max:255',
-            'information_shared' => 'nullable|boolean',
-            'information_nature' => 'nullable|string',
-            'outsourced_processing' => 'nullable|boolean',
-            'processor' => 'nullable|string|max:255',
-            'transborder_processing' => 'nullable|boolean',
-            'country' => 'nullable|string|max:255',
-            'lawful_basis' => 'nullable|array',
-            'lawful_basis.*' => 'string',
-            'retention_period_years' => 'nullable|integer',
-            'retention_rationale' => 'nullable|string',
-            'users_count' => 'nullable|integer',
-            'access_control' => 'nullable|boolean',
-            'personal_data_category' => 'nullable|array',
-            'personal_data_category.*' => 'string',
-            'organisation_name' => 'nullable|string|max:255',
-            'department_name' => 'nullable|string|max:255',
-            'other_department' => 'nullable|string|max:255',
-            'processes' => 'nullable|array',
-            'processes.*' => 'string',
-            'data_sources' => 'nullable|array',
-            'data_sources.*' => 'string',
-            'data_formats' => 'nullable|array',
-            'data_formats.*' => 'string',
-        ]);
+{
+    try {
+        // Validate fields
+        $data = $this->validateRopa($request);
 
-        // Default status to Pending if not provided
-        $data['status'] = $data['status'] ?? 'Pending';
-        $data['user_id'] = auth()->id();
-
-        $ropa = Ropa::create($data);
-
-        // Initialize default risk weights
-        foreach ($this->getScoreableFields() as $field) {
-            $ropa->riskWeightSettings()->create([
-                'field_name' => $field,
-                'weight' => 0,
-            ]);
+        // 🔹 Handle department mapping
+        if (isset($data['department']) && $data['department'] === 'Other') {
+            $data['department_name'] = $data['other_department'] ?? null;
+        } else {
+            $data['department_name'] = $data['department'] ?? null;
         }
 
+        // 🔹 Set default status
+        $data['status'] = 'Pending';
+
+        // 🔹 Save ROPA record
+        $ropa = Ropa::create([
+            'user_id' => auth()->id(),
+            'status' => 'Pending',
+            'ropa_create' => $data,
+        ]);
+
+        Log::info('ROPA record created', [
+            'user_id' => auth()->id(),
+            'ropa_id' => $ropa->id
+        ]);
+
         return redirect()->route('ropa.index')->with('success', 'ROPA record created successfully.');
+        
+    } catch (\Exception $e) {
+
+        Log::error('Error creating ROPA record', [
+            'message' => $e->getMessage(),
+            'stack' => $e->getTraceAsString()
+        ]);
+
+        return redirect()->back()->withInput()->with('error', 'Failed to create ROPA record. Please try again.');
     }
+}
+
 
     /**
-     * Display the specified resource
-     */
-    public function show(Ropa $ropa)
-    {
-        return view('ropa.show', compact('ropa'));
-    }
-
-    /**
-     * Show the form for editing the specified resource
+     * Show the form to edit an existing ROPA record.
      */
     public function edit(Ropa $ropa)
     {
-        $lawfulOptions = $this->getLawfulBasisOptions();
-        $personalDataOptions = $this->getPersonalDataCategories();
+        $this->authorizeRopaOwner($ropa);
 
-        $selectedLawfulBasis = $ropa->lawful_basis ?? [];
-        $selectedPersonalData = $ropa->personal_data_category ?? [];
-        $selectedProcesses = $ropa->processes ?? [];
-        $selectedSources = $ropa->data_sources ?? [];
-        $selectedFormats = $ropa->data_formats ?? [];
-
-        return view('ropa.edit', compact(
-            'ropa',
-            'lawfulOptions',
-            'personalDataOptions',
-            'selectedLawfulBasis',
-            'selectedPersonalData',
-            'selectedProcesses',
-            'selectedSources',
-            'selectedFormats'
-        ));
+        try {
+            return view('ropa.edit', [
+                'ropa' => $ropa,
+                'lawfulOptions' => $this->getLawfulBasisOptions(),
+                'personalDataOptions' => $this->getPersonalDataCategories(),
+                'ropaData' => $ropa->ropa_create ?? [],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error editing ROPA record', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Failed to open ROPA edit form. Please try again.');
+        }
     }
 
     /**
-     * Update the specified resource in storage
+     * Update an existing ROPA record.
      */
     public function update(Request $request, Ropa $ropa)
     {
-        $data = $request->validate([
-            'status' => 'nullable|string|in:Pending,Reviewed',
-            'date_submitted' => 'nullable|date',
-            'other_specify' => 'nullable|string|max:255',
-            'information_shared' => 'nullable|boolean',
-            'information_nature' => 'nullable|string',
-            'outsourced_processing' => 'nullable|boolean',
-            'processor' => 'nullable|string|max:255',
-            'transborder_processing' => 'nullable|boolean',
-            'country' => 'nullable|string|max:255',
-            'lawful_basis' => 'nullable|array',
-            'lawful_basis.*' => 'string',
-            'retention_period_years' => 'nullable|integer',
-            'retention_rationale' => 'nullable|string',
-            'users_count' => 'nullable|integer',
-            'access_control' => 'nullable|boolean',
-            'personal_data_category' => 'nullable|array',
-            'personal_data_category.*' => 'string',
-            'organisation_name' => 'nullable|string|max:255',
-            'department_name' => 'nullable|string|max:255',
-            'other_department' => 'nullable|string|max:255',
-            'processes' => 'nullable|array',
-            'processes.*' => 'string',
-            'data_sources' => 'nullable|array',
-            'data_sources.*' => 'string',
-            'data_formats' => 'nullable|array',
-            'data_formats.*' => 'string',
-        ]);
+        $this->authorizeRopaOwner($ropa);
 
-        $ropa->update($data);
+        try {
+            $data = $this->validateRopa($request, true);
 
-        // Update dynamic risk weights if submitted
-        if ($request->has('weights')) {
-            foreach ($request->input('weights') as $field => $weight) {
-                if (in_array($field, $this->getScoreableFields())) {
-                    $ropa->riskWeightSettings()->updateOrCreate(
-                        ['field_name' => $field],
-                        ['weight' => $weight]
-                    );
-                }
-            }
+            $ropa->update([
+                'ropa_create' => $data,
+                'status' => $data['status'] ?? $ropa->status,
+            ]);
+
+            Log::info('ROPA record updated', [
+                'user_id' => auth()->id(),
+                'ropa_id' => $ropa->id
+            ]);
+
+            return redirect()->route('ropa.index')->with('success', 'ROPA record updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error updating ROPA record', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->withInput()->with('error', 'Failed to update ROPA record. Please try again.');
         }
-
-        return redirect()->route('ropa.index')->with('success', 'ROPA record updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage
+     * Delete a ROPA record.
      */
     public function destroy(Ropa $ropa)
     {
-        $ropa->delete();
+        $this->authorizeRopaOwner($ropa);
 
-        return redirect()->route('ropa.index')->with('success', 'ROPA record deleted successfully.');
+        try {
+            $ropa->delete();
+            Log::info('ROPA record deleted', [
+                'user_id' => auth()->id(),
+                'ropa_id' => $ropa->id
+            ]);
+
+            return redirect()->route('ropa.index')->with('success', 'ROPA record deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting ROPA record', [
+                'message' => $e->getMessage(),
+                'stack' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Failed to delete ROPA record. Please try again.');
+        }
     }
 
     /**
-     * List of fields that contribute to risk score
+     * Validate ROPA request data.
      */
-    private function getScoreableFields(): array
+    private function validateRopa(Request $request, bool $updating = false): array
+{
+    // Clean arrays before validation
+    $request->merge([
+        'data_sources' => array_filter($request->input('data_sources', []), fn($v) => is_string($v) && trim($v) !== ''),
+        'data_formats' => array_filter($request->input('data_formats', []), fn($v) => is_string($v) && trim($v) !== ''),
+        'processes' => array_filter($request->input('processes', []), fn($v) => is_string($v) && trim($v) !== ''),
+    ]);
+
+    return $request->validate([
+        'organisation_name' => 'nullable|string|max:255',
+
+        // Department handling
+        'department' => 'nullable|string|max:255',
+        'other_department' => 'nullable|string|max:255',
+
+        'other_specify' => 'nullable|string|max:255',
+
+        'information_shared' => 'nullable|boolean',
+        'information_nature' => 'nullable|string',
+
+        'outsourced_processing' => 'nullable|boolean',
+        'processor' => 'nullable|string|max:255',
+
+        'transborder_processing' => 'nullable|boolean',
+        'country' => 'nullable|string|max:255',
+
+        'lawful_basis' => 'nullable|array',
+        'lawful_basis.*' => 'nullable|string|max:255',
+
+        'retention_period_years' => 'nullable|integer|min:0',
+        'retention_rationale' => 'nullable|string',
+
+        'users_count' => 'nullable|integer|min:1',
+        'access_control' => 'nullable|boolean',
+
+        'personal_data_category' => 'nullable|array',
+        'personal_data_category.*' => 'nullable|string|max:255',
+
+        'processes' => 'nullable|array',
+        'processes.*' => 'nullable|string|max:255',
+
+        'data_sources' => 'nullable|array',
+        'data_sources.*' => 'nullable|string|max:255',
+
+        'data_formats' => 'nullable|array',
+        'data_formats.*' => 'nullable|string|max:255',
+
+        'status' => $updating ? 'nullable|string|in:Pending,Reviewed' : 'nullable',
+    ]);
+}
+
+
+    /**
+     * Ensure the logged-in user owns the ROPA record.
+     */
+    private function authorizeRopaOwner(Ropa $ropa)
     {
-        return [
-            'other_specify',
-            'information_shared',
-            'information_nature',
-            'outsourced_processing',
-            'processor',
-            'transborder_processing',
-            'country',
-            'lawful_basis',
-            'retention_period_years',
-            'retention_rationale',
-            'users_count',
-            'access_control',
-            'personal_data_category',
-            'processes',
-            'data_sources',
-            'data_formats',
-        ];
+        if ($ropa->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
     }
 
     /**
-     * Lawful basis options
+     * Options for lawful basis.
      */
     private function getLawfulBasisOptions(): array
     {
@@ -245,7 +267,7 @@ class RopaController extends Controller
     }
 
     /**
-     * Personal data category options
+     * Options for personal data categories.
      */
     private function getPersonalDataCategories(): array
     {
@@ -262,31 +284,4 @@ class RopaController extends Controller
             'Other',
         ];
     }
-
-    
-    public function adminIndex()
-{
-    $ropas = Ropa::with('user')->orderBy('created_at', 'desc')->paginate(10);
-
-    return view('admin.dashboard', compact('ropas'));
-}
-
-
-public function updateStatus(Request $request, Ropa $ropa)
-{
-    $request->validate(['status' => 'required|in:Pending,Reviewed']);
-    $ropa->update(['status' => $request->status]);
-    return response()->json(['message' => 'Status updated successfully']);
-}
-
-
-public function print(Ropa $ropa)
-{
-    // Example: generate a PDF (using a package like barryvdh/laravel-dompdf)
-    $pdf = \PDF::loadView('ropa.pdf', compact('ropa'));
-
-    return $pdf->download('ROPA_' . $ropa->id . '.pdf');
-}
-
-
 }

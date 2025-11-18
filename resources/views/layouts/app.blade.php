@@ -36,11 +36,13 @@
                     </a>
                 </li>
 
-                <li class="mb-2">
-                    <a href="#" class="flex items-center py-2 px-3 rounded hover:bg-orange-500 transition-colors duration-200">
-                        <i data-feather="check-square" class="w-5 h-5 mr-2"></i> Reviews
-                    </a>
-                </li>
+<li class="mb-2">
+    <a href="{{ route('reviews.index') }}" 
+       class="flex items-center py-2 px-3 rounded hover:bg-orange-500 transition-colors duration-200">
+        <i data-feather="check-square" class="w-5 h-5 mr-2"></i> Reviews
+    </a>
+</li>
+
 
                 <!-- Account Settings Button -->
                 <li class="mb-2 w-full">

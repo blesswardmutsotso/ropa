@@ -68,42 +68,32 @@
                     <div>
                         <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
                         <input type="text" id="name" name="name" value="{{ old('name', auth()->user()->name) }}"
-                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none @error('name') border-red-500 @enderror">
-                        @error('name')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                            class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                            readonly>
                     </div>
 
                     <!-- Email -->
                     <div>
                         <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
                         <input type="email" id="email" name="email" value="{{ old('email', auth()->user()->email) }}"
-                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none @error('email') border-red-500 @enderror">
-                        @error('email')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                            class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                            readonly>
                     </div>
 
                     <!-- Department -->
                     <div>
                         <label for="department" class="block text-sm font-semibold text-gray-700 mb-1">Department</label>
                         <input type="text" id="department" name="department" value="{{ old('department', auth()->user()->department) }}"
-                            placeholder="Optional"
-                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none @error('department') border-red-500 @enderror">
-                        @error('department')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                            class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                            readonly>
                     </div>
 
                     <!-- Job Title -->
                     <div>
                         <label for="job_title" class="block text-sm font-semibold text-gray-700 mb-1">Job Title</label>
                         <input type="text" id="job_title" name="job_title" value="{{ old('job_title', auth()->user()->job_title) }}"
-                            placeholder="Optional"
-                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none @error('job_title') border-red-500 @enderror">
-                        @error('job_title')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
+                            class="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                            readonly>
                     </div>
 
                     <!-- Active Status -->
@@ -115,9 +105,9 @@
 
                     <!-- Save Changes -->
                     <div class="flex justify-end mt-4">
-                        <button type="submit" class="flex items-center bg-orange-500 text-white px-5 py-2 rounded-lg hover:bg-orange-600 transition">
+                        <!-- <button type="submit" class="flex items-center bg-orange-500 text-white px-5 py-2 rounded-lg hover:bg-orange-600 transition">
                             <i data-feather="save" class="w-4 h-4 mr-2"></i> Save Changes
-                        </button>
+                        </button> -->
                     </div>
                 </form>
             </div>

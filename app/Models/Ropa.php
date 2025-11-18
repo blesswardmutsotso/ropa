@@ -19,52 +19,20 @@ class Ropa extends Model
 
     /**
      * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
-        'status',
-        'date_submitted',
-        'other_specify',
-        'information_shared',
-        'information_nature',
-        'outsourced_processing',
-        'processor',
-        'transborder_processing',
-        'country',
-        'lawful_basis',            // multiple selection
-        'retention_period_years',
-        'retention_rationale',
-        'users_count',
-        'access_control',
-        'personal_data_category',  // multiple selection
-        'organisation_name',
-        'department_name',
-        'other_department',
-        'processes',               // multiple processes
-        'data_sources',            // multiple data sources
-        'data_formats',            // multiple data formats
         'user_id',
+        'status',       // Table column
+        'ropa_create',  // JSON column
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
+     * The attributes that should be cast.
      */
     protected $casts = [
         'date_submitted' => 'datetime',
-        'retention_period_years' => 'integer',
-        'users_count' => 'integer',
-        'information_shared' => 'boolean',
-        'outsourced_processing' => 'boolean',
-        'transborder_processing' => 'boolean',
-        'access_control' => 'boolean',
-        'lawful_basis' => 'array',
-        'personal_data_category' => 'array',
-        'processes' => 'array',
-        'data_sources' => 'array',
-        'data_formats' => 'array',
+        'ropa_create' => 'array', 
+         // nested JSON
     ];
 
     /**
@@ -79,6 +47,8 @@ class Ropa extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+   
 
     public function riskScores()
     {
@@ -99,21 +69,17 @@ class Ropa extends Model
 
         $totalWeight = array_sum($weights);
         if ($totalWeight <= 0) {
-            return 0; // Avoid division by zero if no weights exist
+            return 0;
         }
 
         $score = 0;
-
         foreach ($weights as $field => $weight) {
-            if (isset($this->$field) && !empty($this->$field)) {
+            if (isset($this->ropa_create[$field]) && !empty($this->ropa_create[$field])) {
                 $score += $weight;
             }
         }
 
-        // Normalize to a percentage (out of 100)
-        $normalizedScore = ($score / $totalWeight) * 100;
-
-        return round($normalizedScore, 2);
+        return round(($score / $totalWeight) * 100, 2);
     }
 
     /**
@@ -121,7 +87,7 @@ class Ropa extends Model
      */
     public function isReviewed(): bool
     {
-        return $this->status === self::STATUS_REVIEWED;
+        return ($this->ropa_create['status'] ?? null) === self::STATUS_REVIEWED;
     }
 
     /**
@@ -129,6 +95,6 @@ class Ropa extends Model
      */
     public function isPending(): bool
     {
-        return $this->status === self::STATUS_PENDING;
+        return ($this->ropa_create['status'] ?? null) === self::STATUS_PENDING;
     }
 }

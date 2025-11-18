@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\UserStatusLog;
 use App\Models\Ropa;
 use App\Mail\UserStatusChanged;
 use Illuminate\Support\Facades\Mail;
@@ -22,14 +23,37 @@ class DashboardController extends Controller
         return view('admindashboard.dashboard', compact('user'));
     }
 
+
+    public function dashboard()
+{
+    $user = auth()->user(); // Get the currently logged-in user
+
+    // Fetch the latest 5 notifications (or logs) for display
+    $notifications = UserStatusLog::with('user')
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
+
+    // Return the dashboard view with variables
+    return view('dashboard', compact('user', 'notifications'));
+}
+
+
     /**
      * Show user dashboard.
      */
     public function user()
-    {
-        $user = auth()->user();
-        return view('dashboard', compact('user'));
-    }
+{
+    $user = auth()->user();
+
+    // Fetch latest 5 notifications for the user
+    $notifications = UserStatusLog::with('user')
+        ->orderBy('created_at', 'desc')
+        ->take(5)
+        ->get();
+
+    return view('dashboard', compact('user', 'notifications'));
+}
 
     /**
      * Show profile edit form.
@@ -294,6 +318,7 @@ public function store(Request $request)
         return back()->with('error', 'Failed to create user. Check logs for details.');
     }
 }
+
 
 
 }

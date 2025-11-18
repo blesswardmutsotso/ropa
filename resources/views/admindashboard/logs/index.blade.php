@@ -4,24 +4,26 @@
 
 @section('content')
 <div class="container mx-auto p-4 sm:p-6">
+
     <!-- Page Header -->
-    <h2 class="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
+    <h2 class="text-2xl font-bold mb-6 text-orange-700 flex items-center">
         <i data-feather="activity" class="w-6 h-6 mr-2"></i> User Activities (System Logs)
     </h2>
 
     <!-- Export and Search -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
         <a href="{{ route('activities.export') }}" 
-           class="flex items-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-indigo-600 hover:text-white transition text-sm sm:text-base shadow-sm">
+           class="flex items-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-orange-600 hover:text-white transition text-sm sm:text-base shadow-sm">
             <i data-feather="download" class="w-4 h-4 mr-2"></i> Export CSV
         </a>
 
         <form method="GET" action="{{ route('activities.index') }}" class="flex items-center w-full sm:w-1/3">
             <input type="text" name="search" value="{{ request('search') }}" 
                    placeholder="Search by user, action, or IP..." 
-                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm sm:text-base">
+                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm sm:text-base">
+
             <button type="submit" 
-                    class="ml-2 flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm sm:text-base">
+                    class="ml-2 flex items-center bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition text-sm sm:text-base">
                 <i data-feather="search" class="w-4 h-4 mr-1"></i> Search
             </button>
         </form>
@@ -30,7 +32,7 @@
     <!-- Table -->
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
         <table class="min-w-full table-auto border-collapse text-sm sm:text-base">
-            <thead class="bg-indigo-700 text-white">
+            <thead class="bg-orange-700 text-white">
                 <tr>
                     <th class="py-3 px-4 text-left">User</th>
                     <th class="py-3 px-4 text-left">Action</th>
@@ -52,7 +54,7 @@
                             <div class="flex justify-center space-x-3">
                                 <!-- View -->
                                 <a href="{{ route('activities.show', $activity->id) }}" 
-                                   class="text-blue-600 hover:text-blue-800" title="View Details">
+                                   class="text-orange-600 hover:text-orange-800" title="View Details">
                                     <i data-feather="eye"></i>
                                 </a>
 

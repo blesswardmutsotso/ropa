@@ -26,7 +26,7 @@
 </div>
 
 {{-- Main Form --}}
-    <form id="progressForm" action="" method="POST" enctype="multipart/form-data">
+<form id="progressForm" action="{{ route('ropa.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         {{-- SECTION 1: Organisation Details --}}
@@ -48,7 +48,6 @@
 <!-- SECTION 1: Organisation Details -->
 <!-- SECTION 1: Organisation Details -->
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-
 
     <!-- Progress Bar -->
     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
@@ -75,7 +74,7 @@
             </select>
         </div>
 
-        <!-- Custom Organisation Name (Visible only when "Other" is selected) -->
+        <!-- Custom Organisation Name -->
         <div id="otherOrgContainer" class="hidden">
             <label for="other_organisation_name"
                 class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
@@ -110,7 +109,7 @@
             </select>
         </div>
 
-        <!-- Custom Department Name (Visible only when "Other" is selected) -->
+        <!-- Custom Department Name -->
         <div id="otherDeptContainer" class="hidden">
             <label for="other_department"
                 class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
@@ -123,6 +122,29 @@
 
     </div>
 </div>
+
+<!-- SCRIPT FOR DYNAMIC FIELDS -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Organisation - Show custom input when 'Other' is selected
+        const orgSelect = document.getElementById("organisation_name");
+        const otherOrg = document.getElementById("otherOrgContainer");
+
+        orgSelect.addEventListener("change", function () {
+            otherOrg.classList.toggle("hidden", this.value !== "Other");
+        });
+
+        // Department - Show custom input when 'Other' is selected
+        const deptSelect = document.getElementById("department");
+        const otherDept = document.getElementById("otherDeptContainer");
+
+        deptSelect.addEventListener("change", function () {
+            otherDept.classList.toggle("hidden", this.value !== "Other");
+        });
+
+    });
+</script>
 
 
       {{-- SECTION 2: Processing Activity --}}
@@ -554,7 +576,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <input type="number" name="retention_period_years" placeholder="Retention Period (Years)"
             class="section-legal p-2 border rounded-lg w-full">
 
-        <input type="number" name="access_estimate" placeholder="Estimated Number of People With Access"
+        <input type="number" name="access_estimate" placeholder="Estimated Number of People With Access to Data "
             class="section-legal p-2 border rounded-lg w-full">
     </div>
 
@@ -628,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
 
             <button type="button" id="addAccessMeasure"
-                class="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                class="mt-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-purple-700">
                 + Add More
             </button>
         </div>

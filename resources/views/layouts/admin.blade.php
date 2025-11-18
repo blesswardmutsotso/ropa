@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin Dashboard')</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+
+    <!-- REQUIRED TO PREVENT 419 ERRORS -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/feather-icons"></script>
 </head>
@@ -12,8 +16,8 @@
 
 <div class="flex min-h-screen">
 
-    <!-- ORANGE-500 SIDEBAR -->
-    <aside class="w-64 bg-orange-500 text-white p-4 flex flex-col items-center">
+    <!-- ORANGE-500 SIDEBAR (STATIC/FIXED) -->
+    <aside class="w-64 bg-orange-500 text-white p-4 flex flex-col items-center fixed top-0 left-0 h-full overflow-y-auto">
 
         <!-- Logo -->
         <div class="mb-6">
@@ -71,9 +75,11 @@
 
     </aside>
 
-    <main class="flex-1 p-6">
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 p-6 ml-64">
         @yield('content')
     </main>
+
 </div>
 
 <script>
