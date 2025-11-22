@@ -162,24 +162,25 @@
 
                 <!-- Two-Factor Authentication (2FA) -->
                 <div class="mt-6">
-                    <span class="text-orange-700 font-semibold">Two-Factor Authentication (2FA)</span>
-                    <form method="POST" action="{{ route('2fa.toggle') }}" class="mt-2 relative">
-                        @csrf
-                        @method('PATCH')
+    <span class="text-orange-700 font-semibold">Two-Factor Authentication (2FA)</span>
+    <form method="POST" action="{{ route('2fa.toggle') }}" class="mt-2 relative">
+        @csrf
+        @method('PATCH')
 
-                        <label for="2fa-toggle" class="flex items-center cursor-pointer relative">
-                            <input type="checkbox" id="2fa-toggle" name="two_factor_enabled" class="sr-only peer"
-                                onchange="this.form.submit()" {{ auth()->user()->two_factor_enabled ? 'checked' : '' }}>
-                            <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-orange-500 transition-colors duration-300"></div>
-                            <div class="absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-300
-                                        peer-checked:translate-x-6"></div>
-                            <span class="ml-16 text-sm font-medium text-gray-900">
-                                {{ auth()->user()->two_factor_enabled ? 'Enabled' : 'Disabled' }}
-                            </span>
-                        </label>
-                    </form>
-                </div>
-            </div>
+        <label for="2fa-toggle" class="flex items-center cursor-pointer relative">
+            <input type="checkbox" id="2fa-toggle" class="sr-only peer"
+                onchange="this.form.submit()" {{ auth()->user()->two_factor_enabled ? 'checked' : '' }}>
+            
+            <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-orange-500 transition-colors duration-300"></div>
+            <div class="absolute left-0 top-0 w-6 h-6 bg-white rounded-full shadow transform transition-transform duration-300
+                        peer-checked:translate-x-6"></div>
+            
+            <span class="ml-16 text-sm font-medium text-gray-900">
+                {{ auth()->user()->two_factor_enabled ? 'Enabled' : 'Disabled' }}
+            </span>
+        </label>
+    </form>
+</div>
 
         </div>
     </div>

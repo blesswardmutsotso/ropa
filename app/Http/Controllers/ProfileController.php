@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TwoFactorStatusChanged;
+use App\Models\User;
 
 
 class ProfileController extends Controller
@@ -72,15 +73,22 @@ class ProfileController extends Controller
     }
 
 
-
 public function toggleTwoFactor(Request $request)
 {
-    $user = auth()->user();
+    // If admin, they can toggle any user's 2FA
+    if (auth()->user()->user_type === 1 && $request->filled('user_id')) {
+        $user = User::findOrFail($request->user_id);
+    } else {
+        // Otherwise, toggle own 2FA
+        $user = auth()->user();
+    }
+
     $user->two_factor_enabled = !$user->two_factor_enabled;
     $user->save();
+
     Mail::to($user->email)->send(new TwoFactorStatusChanged($user, $user->two_factor_enabled));
+
     return back()->with('status', 'Two-Factor Authentication updated successfully.');
 }
-
 
 }

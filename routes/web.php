@@ -5,10 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RopaController;
 use App\Http\Controllers\RiskScoreController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\RiskWeightSettingController;
 use App\Http\Controllers\UserActivityController;
 use App\Http\Controllers\TwoFactorController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 
 
 Route::get('/', function () {
@@ -119,9 +119,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
   // Risk Score 
 
-  Route::resource('risk_scores', RiskScoreController::class);
-
-  Route::resource('risk-weights', RiskWeightSettingController::class);
+ 
 
 
   // Activity Route
@@ -142,10 +140,33 @@ Route::get('/activities/export', [UserActivityController::class, 'export'])->nam
 });
 
 
- Route::get('/ropa/{id}/print', [RopaController::class, 'print'])->name('ropa.print'); Route::patch('/profile/2fa-toggle', [ProfileController::class, 'toggleTwoFactor'])->name('2fa.toggle');
+Route::get('/ropa/{id}/print', [RopaController::class, 'print'])->name('ropa.print');
+Route::patch('/profile/2fa-toggle', [ProfileController::class, 'toggleTwoFactor'])->name('2fa.toggle');
 
- // Review  route 
-  Route::resource('reviews', ReviewController::class);
+// Review routes
+// Review routes
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+
+    Route::get('/reviews/{id}', [AdminReviewController::class, 'show'])->name('reviews.show');
+
+    Route::put('/reviews/{id}', [AdminReviewController::class, 'update'])->name('reviews.update');
+
+    Route::put('/reviews/{id}/compliance', [AdminReviewController::class, 'updateCompliance'])
+        ->name('reviews.update.compliance');
+
+    Route::delete('/reviews/{id}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // ⭐ NEW: Export Reviews to Excel (matching your view)
+    Route::get('/reviews/export/excel', [AdminReviewController::class, 'exportExcel'])
+        ->name('reviews.export.excel');
+
+    // ⭐ REQUIRED: Bulk Delete + Bulk Export route
+    Route::post('/reviews/bulk-action', [AdminReviewController::class, 'bulkAction'])
+        ->name('reviews.bulk.action');   // <--- THIS FIXES THE ERROR
+});
+
 
 
 require __DIR__.'/auth.php';

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\UserStatusLog;
 use App\Models\Ropa;
+use Illuminate\Support\Facades\DB;
 use App\Mail\UserStatusChanged;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -208,26 +209,40 @@ public function show(User $user)
     return view('admindashboard.user.show', compact('user'));
 }
 
+
 public function analytics(Request $request)
 {
-    $ropas = Ropa::with('user')
-        ->when($request->department, fn($q) => $q->where('department_name', $request->department))
-        ->when($request->month, fn($q) => 
-            $q->whereMonth('date_submitted', date('m', strtotime($request->month)))
+    // Base query
+    $baseQuery = Ropa::query()
+        ->with('user:id,name') // load only needed columns
+        ->when($request->department, fn($q) =>
+            $q->where('department_name', $request->department)
         )
+        ->when($request->month, fn($q) =>
+            $q->whereMonth('date_submitted', date('m', strtotime($request->month)))
+        );
+
+    // Main paginated data
+    $ropas = $baseQuery
         ->orderBy('date_submitted', 'desc')
         ->paginate(10);
 
-    $totalRecords = Ropa::count();
-    $highRisk = 25; // Replace with actual calculated values
+    // Total records from filtered query (not whole table)
+    $totalRecords = (clone $baseQuery)->count();
+
+    // Risk distribution (replace with your real logic)
+    $highRisk = 25;
     $mediumRisk = 40;
     $lowRisk = 35;
 
-    // ✅ Count reviewed vs pending
-    $reviewedCount = Ropa::where('status', 'Reviewed')->count();
-    $pendingCount = Ropa::where('status', 'Pending')->count();
+    // Reviewed vs Pending (single grouped query)
+    $statusCounts = Ropa::select('status', DB::raw('COUNT(*) as total'))
+        ->groupBy('status')
+        ->pluck('total', 'status');
 
-    // ✅ Make sure to pass these to the view
+    $reviewedCount = $statusCounts['Reviewed'] ?? 0;
+    $pendingCount = $statusCounts['Pending'] ?? 0;
+
     return view('admindashboard.analytics.index', compact(
         'ropas',
         'totalRecords',
@@ -239,11 +254,6 @@ public function analytics(Request $request)
     ));
 }
 
-
-public function createUser()
-{
-    return view('admindashboard.user.create');
-}
 
 /**
  * Store a newly created user.

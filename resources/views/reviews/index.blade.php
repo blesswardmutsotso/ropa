@@ -49,11 +49,17 @@
                 <thead>
                     <tr>
                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
-                            ROPA
+                            Processing Activity
                         </th>
                         <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
                             Reviews
                         </th>
+
+                        <!-- NEW SCORE COLUMN -->
+                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Score
+                        </th>
+
                         <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
                             Actions
                         </th>
@@ -70,15 +76,17 @@
                                     <i data-feather="briefcase" class="w-4 h-4 text-orange-500"></i>
                                     {{ $ropa->ropa_create['organisation_name'] ?? 'No Organization' }}
                                 </div>
-                               <div class="text-xs text-green-600 flex items-center gap-1 mt-1">
-    <i data-feather="calendar" class="w-3 h-3 text-green-500"></i>
+                                
+                                
+<div class="text-xs text-sky-500 flex items-center gap-1 mt-1">
+    <i data-feather="calendar" class="w-3 h-3 text-sky-500"></i>
     Submitted: {{ $ropa->created_at->format('d M Y') }}
 </div>
-<div class="text-xs text-black-600 flex items-center gap-1 mt-1">
-    <i data-feather="info" class="w-3 h-3 text-black-500"></i>
-    Status: {{ $ropa->status }}
-</div>
 
+                                <div class="text-xs text-black-600 flex items-center gap-1 mt-1">
+                                    <i data-feather="info" class="w-3 h-3 text-black-500"></i>
+                                    Status: {{ $ropa->status }}
+                                </div>
                             </td>
 
                             <!-- Reviews -->
@@ -108,14 +116,24 @@
                                 @endif
                             </td>
 
+                            <!-- SCORE COLUMN -->
+                            <td class="px-4 py-4 text-gray-700 dark:text-gray-300 text-center font-bold">
+                                @if($ropa->reviews->count())
+                                    {{ number_format($ropa->reviews->avg('score'), 1) }}%
+                                @else
+                                    <span class="text-yellow-600">Pending</span>
+                                @endif
+                            </td>
+
                             <!-- Actions -->
                             <td class="px-4 py-4 text-center align-middle flex justify-center gap-2">
-                                <!-- View Button -->
-                                <a href=""
-                                   class="bg-orange-500 text-white font-semibold px-3 py-1 rounded flex items-center gap-1 hover:bg-orange-600 transition">
-                                    <i data-feather="eye" class="w-4 h-4"></i>
-                                    View
-                                </a>
+
+<!-- View Button -->
+<a href="{{ route('reviews.show', $ropa->id) }}"
+   class="bg-orange-500 text-white font-semibold px-3 py-1 rounded flex items-center gap-1 hover:bg-orange-600 transition">
+    <i data-feather="eye" class="w-4 h-4"></i>
+    View
+</a>
 
                                 <!-- Print Button -->
                                 <a href="" target="_blank"

@@ -5,25 +5,51 @@
 @section('content')
 <div class="container mx-auto p-4 sm:p-6">
 
-   {{-- OVERALL PROGRESS BAR + SAVE BUTTON --}}
-<div class="sticky top-0 z-50 bg-white shadow-md p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-        <h2 class="text-xl font-bold text-orange-500 mb-2 sm:mb-0 flex items-center">
-            <i data-feather="activity" class="w-5 h-5 mr-2 text-orange-500"></i> Overall Progress
-        </h2>
-        <div class="w-full sm:w-64 bg-gray-200 rounded-full h-4">
-            <div class="bg-orange-500 h-4 rounded-full" id="overallProgress" style="width:0%"></div>
-        </div>
-        <span class="text-sm font-semibold text-gray-700 mt-1 block sm:mt-0" id="overallProgressLabel">0%</span>
-    </div>
-
-    <div>
-        <button type="submit" form="progressForm" class="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600 flex items-center transition">
-            <i data-feather="save" class="w-5 h-5 mr-2"></i> Save Progress
-        </button>
-    </div>
+{{-- SAVE BUTTON ONLY --}}
+<div class="sticky top-0 z-50 bg-white shadow-md p-4 mb-6 flex justify-end">
+    <button type="submit" form="progressForm" 
+            class="bg-orange-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-600 flex items-center transition">
+        <i data-feather="save" class="w-5 h-5 mr-2"></i> Save Progress
+    </button>
 </div>
+
+
+
+
+@if(session('success'))
+    <div id="alert-success" class="fixed top-5 right-5 bg-green-500 text-white px-6 py-4 rounded shadow-lg z-50">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div id="alert-error" class="fixed top-5 right-5 bg-red-500 text-white px-6 py-4 rounded shadow-lg z-50">
+        {{ session('error') }}
+    </div>
+@endif
+
+@if($errors->any())
+    <div id="alert-validation" class="fixed top-5 right-5 bg-red-600 text-white px-6 py-4 rounded shadow-lg z-50">
+        Please correct the errors in the form.
+    </div>
+@endif
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            const success = document.getElementById('alert-success');
+            if (success) success.remove();
+
+            const error = document.getElementById('alert-error');
+            if (error) error.remove();
+        }, 12000); // 5000ms = 5 seconds
+    });
+</script>
+
+
+
 
 {{-- Main Form --}}
 <form id="progressForm" action="{{ route('ropa.store') }}" method="POST" enctype="multipart/form-data">
@@ -35,7 +61,7 @@
         <h2 class="text-xl font-bold text-orange-500 flex items-center">
             <i data-feather="briefcase" class="w-5 h-5 mr-2"></i> Organisation Details
         </h2>
-        <span class="text-sm font-semibold text-gray-600" id="orgProgressLabel">0%</span>
+     
     </div>
 
     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
@@ -43,9 +69,6 @@
     </div>
 
 
-
-<!-- SECTION 1: Organisation Details -->
-<!-- SECTION 1: Organisation Details -->
 <!-- SECTION 1: Organisation Details -->
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
 
@@ -109,6 +132,7 @@
             </select>
         </div>
 
+
         <!-- Custom Department Name -->
         <div id="otherDeptContainer" class="hidden">
             <label for="other_department"
@@ -147,53 +171,91 @@
 </script>
 
 
-      {{-- SECTION 2: Processing Activity --}}
+{{-- SECTION 2: Processing Activity --}}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-orange-500 flex items-center">
             <i data-feather="cpu" class="w-5 h-5 mr-2"></i> Processing Activity Details 
         </h2>
-        <span class="text-sm font-semibold text-gray-600" id="activityProgressLabel">0%</span>
+       
     </div>
 
     <!-- Progress Bar -->
     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
-        <div class="bg-yellow-500 h-2 rounded-full" id="activityProgress" style="width: 0%"></div>
+      
     </div>
 
-    <!-- Process Form -->
-    {{-- SECTION 2: Processing Activity --}}
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-   
-
-    <!-- Process Form -->
     <div id="processContainer">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 process-row">
             <input type="text" name="processes[]" placeholder="Process Name" class="section-activity p-2 border rounded-lg w-full">
 
+            <!-- Data Sources -->
             <div class="dynamic-field">
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Data Sources</label>
-                <div class="data-sources-wrapper">
+                
+                <div class="flex flex-wrap gap-4 mb-2">
+                    <label class="flex items-center gap-1">
+                        <input type="checkbox" name="data_sources_checkbox[0][]" value="Employees"> Employees
+                    </label>
+                    <label class="flex items-center gap-1">
+                        <input type="checkbox" name="data_sources_checkbox[0][]" value="Participants"> Participants
+                    </label>
+                    <label class="flex items-center gap-1">
+                        <input type="checkbox" class="other-source-checkbox"> Other
+                    </label>
+                </div>
+
+                <div class="other-sources-container mt-1"></div>
+                <button type="button" class="add-other-source bg-orange-500 text-white px-2 py-1 rounded-lg mt-1 hidden">+ Add Another Source</button>
+
+                <div class="data-sources-wrapper mt-2">
                     <div class="flex gap-2 mb-2">
-                        <input type="text" name="data_sources[0][]" placeholder="Data Source" class="section-activity p-2 border rounded-lg w-full">
+                        <input type="text" name="data_sources[0][]" placeholder="Additional Data Source" class="section-activity p-2 border rounded-lg w-full">
                         <button type="button" class="bg-red-600 text-white px-2 rounded-lg remove-source">Remove</button>
                     </div>
                 </div>
                 <button type="button" class="bg-orange-500 text-white px-2 py-1 rounded-lg mt-1 add-source">Add Data Source</button>
             </div>
 
+            <!-- Data Formats -->
             <div class="dynamic-field">
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Data Formats</label>
-                <div class="data-formats-wrapper">
-                    <div class="flex gap-2 mb-2">
-                        <input type="text" name="data_formats[0][]" placeholder="Data Format" class="section-activity p-2 border rounded-lg w-full">
-                        <button type="button" class="bg-red-600 text-white px-2 rounded-lg remove-format">Remove</button>
-                    </div>
+                <div class="data-formats-wrapper flex flex-wrap gap-4 mb-2">
+                    <label class="flex items-center gap-1"><input type="checkbox" name="data_formats[0][]" value="CSV"> CSV</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="data_formats[0][]" value="JSON"> JSON</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="data_formats[0][]" value="XML"> XML</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="data_formats[0][]" value="PDF"> PDF</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="data_formats[0][]" value="DOCX"> DOCX</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="data_formats[0][]" value="Excel"> Excel</label>
+                    <label class="flex items-center gap-1">
+                        <input type="checkbox" class="other-format-checkbox"> Other
+                    </label>
                 </div>
-                <button type="button" class="bg-orange-500 text-white px-2 py-1 rounded-lg mt-1 add-format">Add Data Format</button>
+                <div class="other-formats-container mt-1"></div>
+                <button type="button" class="add-other-format bg-orange-500 text-white px-2 py-1 rounded-lg mt-1 hidden">+ Add Another Format</button>
             </div>
 
-            <input type="text" name="information_nature" placeholder="Nature of Information" class="section-activity p-2 border rounded-lg w-full">
+            <!-- Nature of Information -->
+            <input type="text" name="information_nature[]" placeholder="Nature of Information" class="section-activity p-2 border rounded-lg w-full">
+
+            <!-- Categories of Personal Data -->
+            <div class="dynamic-field">
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Categories of Personal Data</label>
+                <div class="personal-categories-wrapper flex flex-wrap gap-2">
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="Name"> Name</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="Address"> Address</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="Email"> Email</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="Phone"> Phone</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="ID Number"> ID Number</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="Financial"> Financial</label>
+                    <label class="flex items-center gap-1"><input type="checkbox" name="personal_data_categories[0][]" value="Health"> Health</label>
+                    <label class="flex items-center gap-1">
+                        <input type="checkbox" class="other-category-checkbox"> Other
+                    </label>
+                </div>
+                <div class="other-categories-container mt-1"></div>
+                <button type="button" class="add-other-category bg-orange-500 text-white px-2 py-1 rounded-lg mt-1 hidden">+ Add Another Category</button>
+            </div>
 
             <!-- Approximate Number of Records -->
             <div>
@@ -206,11 +268,99 @@
                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Data Volume</label>
                 <input type="text" name="data_volume[]" placeholder="Low / Medium / High" class="section-activity p-2 border rounded-lg w-full" readonly>
             </div>
+
+            <!-- Retention Period & People with Access -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 mb-2">
+                <input type="number" name="retention_period_years[]" placeholder="Retention Period (Years)" class="section-legal p-2 border rounded-lg w-full">
+                <input type="number" name="access_estimate[]" placeholder="Estimated Number of People With Access to Data" class="section-legal p-2 border rounded-lg w-full">
+            </div>
+            <textarea name="retention_rationale[]" placeholder="Retention Rationale" rows="2" class="section-legal p-2 border rounded-lg w-full"></textarea>
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Other Format Checkbox ---
+    document.addEventListener('change', function(e){
+        // Data Formats Other
+        if(e.target.classList.contains('other-format-checkbox')){
+            const container = e.target.closest('.dynamic-field').querySelector('.other-formats-container');
+            const addBtn = e.target.closest('.dynamic-field').querySelector('.add-other-format');
+            addBtn.classList.toggle('hidden', !e.target.checked);
+            if(!e.target.checked) container.innerHTML = '';
+        }
+
+        // Personal Categories Other
+        if(e.target.classList.contains('other-category-checkbox')){
+            const container = e.target.closest('.dynamic-field').querySelector('.other-categories-container');
+            const addBtn = e.target.closest('.dynamic-field').querySelector('.add-other-category');
+            addBtn.classList.toggle('hidden', !e.target.checked);
+            if(!e.target.checked) container.innerHTML = '';
+        }
+
+        // Data Sources Other
+        if(e.target.classList.contains('other-source-checkbox')){
+            const container = e.target.closest('.dynamic-field').querySelector('.other-sources-container');
+            const addBtn = e.target.closest('.dynamic-field').querySelector('.add-other-source');
+            addBtn.classList.toggle('hidden', !e.target.checked);
+            if(!e.target.checked) container.innerHTML = '';
+        }
+    });
+
+    // Add new Other Format dynamically
+    document.querySelectorAll('.add-other-format').forEach(btn => {
+        btn.addEventListener('click', function(){
+            const container = this.previousElementSibling;
+            const index = Array.from(document.querySelectorAll('.process-row')).indexOf(this.closest('.process-row'));
+            const div = document.createElement('div');
+            div.classList.add('flex','items-center','gap-2','mt-1');
+            div.innerHTML = `
+                <input type="text" name="data_formats_other[${index}][]" placeholder="Specify other format" class="section-activity p-2 border rounded-lg w-full">
+                <button type="button" class="remove-other-format bg-red-500 text-white px-2 rounded-lg">Remove</button>
+            `;
+            container.appendChild(div);
+        });
+    });
+
+    // Add new Other Category dynamically
+    document.querySelectorAll('.add-other-category').forEach(btn => {
+        btn.addEventListener('click', function(){
+            const container = this.previousElementSibling;
+            const index = Array.from(document.querySelectorAll('.process-row')).indexOf(this.closest('.process-row'));
+            const div = document.createElement('div');
+            div.classList.add('flex','items-center','gap-2','mt-1');
+            div.innerHTML = `
+                <input type="text" name="personal_data_categories_other[${index}][]" placeholder="Specify other category" class="section-activity p-2 border rounded-lg w-full">
+                <button type="button" class="remove-other-category bg-red-500 text-white px-2 rounded-lg">Remove</button>
+            `;
+            container.appendChild(div);
+        });
+    });
+
+    // Add new Other Source dynamically
+    document.querySelectorAll('.add-other-source').forEach(btn => {
+        btn.addEventListener('click', function(){
+            const container = this.previousElementSibling;
+            const index = Array.from(document.querySelectorAll('.process-row')).indexOf(this.closest('.process-row'));
+            const div = document.createElement('div');
+            div.classList.add('flex','items-center','gap-2','mt-1');
+            div.innerHTML = `
+                <input type="text" name="data_sources_other[${index}][]" placeholder="Specify other source" class="section-activity p-2 border rounded-lg w-full">
+                <button type="button" class="remove-other-source bg-red-500 text-white px-2 rounded-lg">Remove</button>
+            `;
+            container.appendChild(div);
+        });
+    });
+
+    // Remove dynamic elements
+    document.addEventListener('click', function(e){
+        if(e.target.classList.contains('remove-other-format')) e.target.parentElement.remove();
+        if(e.target.classList.contains('remove-other-category')) e.target.parentElement.remove();
+        if(e.target.classList.contains('remove-other-source')) e.target.parentElement.remove();
+        if(e.target.classList.contains('remove-source')) e.target.parentElement.remove();
+    });
 
     // Add Data Source dynamically
     document.querySelectorAll('.add-source').forEach(btn => {
@@ -219,33 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const index = Array.from(document.querySelectorAll('.process-row')).indexOf(this.closest('.process-row'));
             const div = document.createElement('div');
             div.classList.add('flex','gap-2','mb-2');
-            div.innerHTML = `<input type="text" name="data_sources[${index}][]" placeholder="Data Source" class="section-activity p-2 border rounded-lg w-full">
+            div.innerHTML = `<input type="text" name="data_sources[${index}][]" placeholder="Additional Data Source" class="section-activity p-2 border rounded-lg w-full">
                              <button type="button" class="bg-red-600 text-white px-2 rounded-lg remove-source">-</button>`;
             wrapper.appendChild(div);
         });
-    });
-
-    // Add Data Format dynamically
-    document.querySelectorAll('.add-format').forEach(btn => {
-        btn.addEventListener('click', function(){
-            const wrapper = this.previousElementSibling;
-            const index = Array.from(document.querySelectorAll('.process-row')).indexOf(this.closest('.process-row'));
-            const div = document.createElement('div');
-            div.classList.add('flex','gap-2','mb-2');
-            div.innerHTML = `<input type="text" name="data_formats[${index}][]" placeholder="Data Format" class="section-activity p-2 border rounded-lg w-full">
-                             <button type="button" class="bg-red-600 text-white px-2 rounded-lg remove-format">-</button>`;
-            wrapper.appendChild(div);
-        });
-    });
-
-    // Remove dynamic field
-    document.addEventListener('click', function(e){
-        if(e.target.classList.contains('remove-source')){
-            e.target.parentElement.remove();
-        }
-        if(e.target.classList.contains('remove-format')){
-            e.target.parentElement.remove();
-        }
     });
 
     // Update Data Volume based on number of records
@@ -269,253 +396,349 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-{{-- SECTION 3: Data Sharing & Outsourcing --}}
+
+
+
+
+{{-- SECTION 3: Data Sharing & Outsourcing (with Access Control) --}}
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
 
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-orange-500 flex items-center">
             <i data-feather="share-2" class="w-5 h-5 mr-2"></i> Data Sharing & Outsourcing
         </h2>
-        <span class="text-sm font-semibold text-gray-600" id="shareProgressLabel">0%</span>
+      
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        {{-- Information Shared --}}
         <select name="information_shared" id="information_shared"
-            class="p-2 border rounded-lg w-full focus:ring-2 focus:ring-orange-500 hover:border-orange-500">
+                class="p-2 border rounded-lg w-full focus:ring-2 focus:ring-orange-500 hover:border-orange-500">
             <option value="">Information Shared?</option>
             <option value="1">Yes</option>
             <option value="0">No</option>
         </select>
-
     </div>
 
-    {{-- CONDITIONAL SECTION --}}
     <div id="infoSharingSection" class="mt-6 hidden">
 
-        <h3 class="text-lg font-semibold mb-3 text-orange-600">
-            Information Sharing Details
-        </h3>
+        <h3 class="text-lg font-semibold mb-3 text-orange-600">Information Sharing Details</h3>
 
-        {{-- Local + Transborder Checkboxes --}}
         <div class="flex gap-6 mb-4">
-
-            <label class="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
+            <label class="flex items-center space-x-2">
                 <input type="checkbox" id="local_check" name="sharing_local" value="1"
-                       class="h-4 w-4 text-orange-500 focus:ring-orange-500">
+                       class="h-4 w-4 text-orange-500">
                 <span>Local Sharing</span>
             </label>
 
-            <label class="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
+            <label class="flex items-center space-x-2">
                 <input type="checkbox" id="trans_check" name="sharing_transborder" value="1"
-                       class="h-4 w-4 text-orange-500 focus:ring-orange-500">
+                       class="h-4 w-4 text-orange-500">
                 <span>Transborder Sharing</span>
             </label>
-
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            {{-- MULTIPLE LOCAL ORGANIZATIONS --}}
+            {{-- Local --}}
             <div id="localContainer" class="col-span-1 sm:col-span-2 hidden">
-                <label class="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
-                    Organizations Shared With (Local)
-                </label>
-
+                <label class="block mb-2 font-semibold">Organizations Shared With (Local)</label>
                 <div id="localRepeat">
                     <div class="flex gap-2 mb-2">
                         <input type="text" name="local_organizations[]" 
-                               class="p-2 border rounded-lg w-full focus:ring-2 focus:ring-orange-500 hover:border-orange-500"
+                               class="p-2 border rounded-lg w-full"
                                placeholder="Enter organization">
-
-                        <button type="button"
-                                class="removeLocal bg-red-500 text-white px-3 py-2 rounded-md hidden hover:bg-red-600">
-                            -
-                        </button>
+                        <button type="button" class="removeLocal bg-red-500 text-white px-3 py-2 rounded-md hidden">-</button>
                     </div>
                 </div>
-
                 <button type="button" id="addLocal"
                         class="mt-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
                     + Add Organization
                 </button>
             </div>
 
-            {{-- MULTIPLE TRANSBORDER COUNTRIES --}}
+            {{-- Transborder --}}
             <div id="transContainer" class="col-span-1 sm:col-span-2 hidden">
-                <label class="block mb-2 font-semibold text-gray-700 dark:text-gray-300">
-                    Countries Shared With (Transborder)
-                </label>
-
+                <label class="block mb-2 font-semibold">Countries Shared With (Transborder)</label>
                 <div id="transRepeat">
                     <div class="flex gap-2 mb-2">
-                        <input type="text" name="transborder_countries[]"
-                               class="p-2 border rounded-lg w-full focus:ring-2 focus:ring-orange-500 hover:border-orange-500"
-                               placeholder="Enter country">
-
-                        <button type="button"
-                                class="removeTrans bg-red-500 text-white px-3 py-2 rounded-md hidden hover:bg-red-600">
-                            -
-                        </button>
+                       <input  type="text"  name="transborder_countries[]"  class="p-2 border rounded-lg w-full"  placeholder="Enter Country"/>
+                        <button type="button" class="removeTrans bg-red-500 text-white px-3 py-2 rounded-md hidden">-</button>
                     </div>
                 </div>
-
                 <button type="button" id="addTrans"
                         class="mt-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
                     + Add Country
                 </button>
             </div>
 
-            {{-- Description --}}
-            <textarea name="sharing_description"
-                id="sharing_description"
-                placeholder="Describe how the information is shared..."
-                class="p-2 border rounded-lg w-full col-span-1 sm:col-span-2 hidden focus:ring-2 focus:ring-orange-500 hover:border-orange-500"></textarea>
-
-            {{-- Number of Days --}}
-            <input type="number" name="sharing_days"
-                id="sharing_days"
-                placeholder="Estimated Number of Days Shared"
-                class="p-2 border rounded-lg w-full hidden focus:ring-2 focus:ring-orange-500 hover:border-orange-500">
-
-            {{-- Comments --}}
-            <textarea name="sharing_comment"
-                id="sharing_comment"
-                placeholder="Comments..."
-                class="p-2 border rounded-lg w-full col-span-1 sm:col-span-2 hidden focus:ring-2 focus:ring-orange-500 hover:border-orange-500"></textarea>
+            <textarea name="sharing_comment" id="sharing_comment" placeholder="Comments..."
+                      class="p-2 border rounded-lg w-full hidden col-span-1 sm:col-span-2"></textarea>
 
         </div>
 
+
+{{-- ACCESS CONTROL MANAGEMENT --}}
+<div class="mt-6">
+    <h3 class="text-lg font-semibold mb-3 text-orange-600 flex items-center">
+        <i data-feather="users" class="w-5 h-5 mr-2"></i> Access Control Management
+    </h3>
+
+    <div class="grid grid-cols-1 gap-4">
+        <select name="access_control" id="access_control" 
+                class="p-2 border rounded-lg w-full">
+            <option value="">Access Controlled?</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select>
+
+        <div id="accessMeasuresSection" class="hidden">
+            <label class="font-semibold mb-2 block">Access Control Measures</label>
+
+            {{-- Dynamic “Other” textboxes --}}
+            <div id="otherMeasuresContainer" class="mt-3 hidden">
+                <label class="font-semibold mb-2 block">Specify Other Measures</label>
+
+                <div id="otherRepeat">
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="text" name="access_measures[]" 
+                               placeholder="Enter custom measure"
+                               class="p-2 border rounded-lg w-full">
+                        <button type="button"
+                                class="removeOther hidden bg-red-500 text-white px-3 py-2 rounded-md">-</button>
+                    </div>
+                </div>
+
+                <button type="button" id="addOtherMeasure"
+                        class="mt-2 bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600">
+                    + Add More
+                </button>
+            </div>
+
+            {{-- Technical Measures --}}
+            <div class="mt-4">
+                <label class="font-semibold mb-2 block text-gray-700">Technical Measures</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Encryption at rest & in transit">
+                        <span>Encryption at rest & in transit</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Role-Based Access Control (RBAC)">
+                        <span>Role-Based Access Control (RBAC)</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Multi-factor authentication (MFA)">
+                        <span>Multi-factor authentication (MFA)</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Automatic audit logs">
+                        <span>Automatic audit logs</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Segmented network architecture">
+                        <span>Segmented network architecture</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Firewalls and VPN-restricted admin access">
+                        <span>Firewalls and VPN-restricted admin access</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="Regular vulnerability scanning and patching">
+                        <span>Regular vulnerability scanning and patching</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="technical_measures[]" value="High-availability and fail-safe mechanisms">
+                        <span>High-availability and fail-safe mechanisms</span>
+                    </label>
+                </div>
+            </div>
+
+            {{-- Organisational Measures --}}
+            <div class="mt-4">
+                <label class="font-semibold mb-2 block text-gray-700">Organisational Measures</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Biometric privacy notice">
+                        <span>Biometric privacy notice</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Internal privacy data policy">
+                        <span>Internal privacy data policy</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Administrator access governance">
+                        <span>Administrator access governance</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Conduct DPIAs">
+                        <span>Conduct DPIAs</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Legitimate Interest Assessment (LIA)">
+                        <span>Legitimate Interest Assessment (LIA)</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Retention and disposal schedule">
+                        <span>Retention and disposal schedule</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Incident response and breach reporting procedures">
+                        <span>Incident response and breach reporting procedures</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Employee onboarding and privacy training">
+                        <span>Employee onboarding and privacy training</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Vendor due diligence and contractual safeguards">
+                        <span>Vendor due diligence and contractual safeguards</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="organisational_measures[]" value="Periodic internal audits">
+                        <span>Periodic internal audits</span>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+        </div>
+        </div>
     </div>
 </div>
 
+{{-- COUNTRY LIST --}}
+<script src="https://cdn.jsdelivr.net/npm/countries-list@2.5.6/dist/countries.min.js"></script>
 
-{{-- SCRIPT --}}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-    let infoShared = document.getElementById('information_shared');
-    let infoSection = document.getElementById('infoSharingSection');
+    /* -------------------------------
+       DATA SHARING
+    --------------------------------*/
+    const infoShared = document.getElementById('information_shared');
+    const infoSection = document.getElementById('infoSharingSection');
+    const localCheck = document.getElementById('local_check');
+    const transCheck = document.getElementById('trans_check');
+    const localContainer = document.getElementById('localContainer');
+    const transContainer = document.getElementById('transContainer');
+    const comment = document.getElementById('sharing_comment');
 
-    // Checkboxes
-    let localCheck = document.getElementById('local_check');
-    let transCheck = document.getElementById('trans_check');
-
-    // Containers
-    let localContainer = document.getElementById('localContainer');
-    let transContainer = document.getElementById('transContainer');
-
-    // Repeat containers
-    let localRepeat = document.getElementById('localRepeat');
-    let addLocal = document.getElementById('addLocal');
-
-    let transRepeat = document.getElementById('transRepeat');
-    let addTrans = document.getElementById('addTrans');
-
-    // Other fields
-    let desc = document.getElementById('sharing_description');
-    let days = document.getElementById('sharing_days');
-    let comment = document.getElementById('sharing_comment');
-
-    const hideAll = () => {
-        localContainer.classList.add('hidden');
-        transContainer.classList.add('hidden');
-        desc.classList.add('hidden');
-        days.classList.add('hidden');
-        comment.classList.add('hidden');
-    };
-
-    // Show main section only when yes
     infoShared.addEventListener('change', () => {
-        if (infoShared.value === "1") {
-            infoSection.classList.remove('hidden');
-        } else {
+        if (infoShared.value === "1") infoSection.classList.remove('hidden');
+        else {
             infoSection.classList.add('hidden');
             localCheck.checked = false;
             transCheck.checked = false;
-            hideAll();
+            localContainer.classList.add('hidden');
+            transContainer.classList.add('hidden');
+            comment.classList.add('hidden');
         }
     });
 
-    // Checkbox logic (supports both checked)
-    const updateVisibility = () => {
-        hideAll();
-
-        if (localCheck.checked) {
-            localContainer.classList.remove('hidden');
-        }
-
-        if (transCheck.checked) {
-            transContainer.classList.remove('hidden');
-        }
-
-        if (localCheck.checked || transCheck.checked) {
-            desc.classList.remove('hidden');
-            days.classList.remove('hidden');
-            comment.classList.remove('hidden');
-        }
+    const updateShareVisibility = () => {
+        localContainer.classList.toggle('hidden', !localCheck.checked);
+        transContainer.classList.toggle('hidden', !transCheck.checked);
+        comment.classList.toggle('hidden', !(localCheck.checked || transCheck.checked));
     };
 
-    localCheck.addEventListener('change', updateVisibility);
-    transCheck.addEventListener('change', updateVisibility);
+    localCheck.addEventListener('change', updateShareVisibility);
+    transCheck.addEventListener('change', updateShareVisibility);
 
-    // Add Local Organization
-    addLocal.addEventListener('click', () => {
-        let div = document.createElement('div');
-        div.classList.add("flex", "gap-2", "mb-2");
-
+    /* ADD / REMOVE LOCAL ORGS */
+    document.getElementById('addLocal').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = "flex gap-2 mb-2";
         div.innerHTML = `
-            <input type="text" name="local_organizations[]" 
-                   class="p-2 border rounded-lg w-full"
-                   placeholder="Enter organization">
-
-            <button type="button"
-                    class="removeLocal bg-red-500 text-white px-3 py-2 rounded-md">-</button>
-        `;
-
-        localRepeat.appendChild(div);
+            <input type="text" name="local_organizations[]" class="p-2 border rounded-lg w-full">
+            <button type="button" class="removeLocal bg-red-500 text-white px-3 py-2 rounded-md">-</button>`;
+        document.getElementById('localRepeat').appendChild(div);
     });
 
-    localRepeat.addEventListener('click', event => {
-        if (event.target.classList.contains('removeLocal')) {
-            event.target.parentElement.remove();
-        }
+    document.getElementById('localRepeat').addEventListener('click', e => {
+        if (e.target.classList.contains('removeLocal')) e.target.parentElement.remove();
     });
 
-    // Add Transborder Country
-    addTrans.addEventListener('click', () => {
-        let div = document.createElement('div');
-        div.classList.add("flex", "gap-2", "mb-2");
+    /* -------------------------------
+       COUNTRY LIST POPULATION
+    --------------------------------*/
+    const populateCountries = () => {
+        document.querySelectorAll('.country-select').forEach(select => {
+            select.innerHTML = '<option value="">Select Country</option>';
+            for (const code in window.countries) {
+                const opt = document.createElement('option');
+                opt.value = window.countries[code].name;
+                opt.text = window.countries[code].name;
+                select.appendChild(opt);
+            }
+        });
+    };
+    populateCountries();
 
+    document.getElementById('addTrans').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = "flex gap-2 mb-2";
+        const clone = document.querySelector('.country-select').cloneNode(true);
+        clone.value = "";
+        div.appendChild(clone);
+        div.innerHTML += `<button type="button" class="removeTrans bg-red-500 text-white px-3 py-2 rounded-md">-</button>`;
+        document.getElementById('transRepeat').appendChild(div);
+        populateCountries();
+    });
+
+    document.getElementById('transRepeat').addEventListener('click', e => {
+        if (e.target.classList.contains('removeTrans')) e.target.parentElement.remove();
+    });
+
+    /* -------------------------------
+       ACCESS CONTROL — RADIO SYSTEM
+    --------------------------------*/
+    const accessControl = document.getElementById('access_control');
+    const accessSection = document.getElementById('accessMeasuresSection');
+    const otherRadio = document.getElementById('otherMeasureRadio');
+    const otherContainer = document.getElementById('otherMeasuresContainer');
+    const otherRepeat = document.getElementById('otherRepeat');
+
+    accessControl.addEventListener('change', () => {
+        if (accessControl.value === "1") accessSection.classList.remove('hidden');
+        else accessSection.classList.add('hidden');
+    });
+
+    /* Show/Hide "Other" inputs */
+    document.querySelectorAll('.measureRadio').forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (otherRadio.checked) otherContainer.classList.remove('hidden');
+            else otherContainer.classList.add('hidden');
+        });
+    });
+
+    /* Add more "Other" fields */
+    document.getElementById('addOtherMeasure').addEventListener('click', () => {
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-2 mb-2";
         div.innerHTML = `
-            <input type="text" name="transborder_countries[]"
-                   class="p-2 border rounded-lg w-full"
-                   placeholder="Enter country">
-
-            <button type="button"
-                    class="removeTrans bg-red-500 text-white px-3 py-2 rounded-md">-</button>
+            <input type="text" name="access_measures[]" class="p-2 border rounded-lg w-full">
+            <button type="button" class="removeOther bg-red-500 text-white px-3 py-2 rounded-md">-</button>
         `;
-
-        transRepeat.appendChild(div);
+        otherRepeat.appendChild(div);
     });
 
-    transRepeat.addEventListener('click', event => {
-        if (event.target.classList.contains('removeTrans')) {
-            event.target.parentElement.remove();
-        }
+    /* Remove "Other" fields */
+    otherRepeat.addEventListener('click', e => {
+        if (e.target.classList.contains('removeOther')) e.target.parentElement.remove();
     });
 
+    if (window.feather) feather.replace();
 });
 </script>
 
-{{-- SECTION 4: Legal & Retention --}}
+
+
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-orange-500 flex items-center">
-            <i data-feather="file-text" class="w-5 h-5 mr-2"></i> Legal & Retention Period 
+            <i data-feather="file-text" class="w-5 h-5 mr-2"></i>  Lawful Basis for Processing
         </h2>
-        <span class="text-sm font-semibold text-gray-600" id="legalProgressLabel">0%</span>
+       
     </div>
 
     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
@@ -524,7 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     {{-- LAWFUL BASIS CHECKBOXES --}}
     <label class="font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
-        Lawful Basis for Processing
+       
     </label>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-sm">
@@ -571,18 +794,7 @@ document.addEventListener("DOMContentLoaded", function () {
         </label>
     </div>
 
-    {{-- RETENTION PERIOD / PEOPLE WITH ACCESS --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        <input type="number" name="retention_period_years" placeholder="Retention Period (Years)"
-            class="section-legal p-2 border rounded-lg w-full">
-
-        <input type="number" name="access_estimate" placeholder="Estimated Number of People With Access to Data "
-            class="section-legal p-2 border rounded-lg w-full">
-    </div>
-
-    <textarea name="retention_rationale" placeholder="Retention Rationale" rows="2"
-        class="section-legal p-2 border rounded-lg w-full"></textarea>
-</div>
+    
 
 {{-- SCRIPT FOR CHECKBOX LOGIC --}}
 <script>
@@ -610,174 +822,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{{-- SECTION 5: Access & Users --}}
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-orange-500 flex items-center">
-            <i data-feather="users" class="w-5 h-5 mr-2"></i> Access Control Management 
-        </h2>
-        <span class="text-sm font-semibold text-gray-600" id="accessProgressLabel">0%</span>
-    </div>
-
-    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
-        <div class="bg-purple-600 h-2 rounded-full" id="accessProgress" style="width: 0%"></div>
-    </div>
-
-    <div class="grid grid-cols-1 gap-4">
-
-        {{-- Access Controlled --}}
-        <select name="access_control" id="access_control" class="section-access p-2 border rounded-lg w-full">
-            <option value="">Access Controlled?</option>
-            <option value="1">Yes</option>
-            <option value="0">No</option>
-        </select>
-
-        {{-- CONDITIONAL SECTION: Access Control Measures --}}
-        <div id="accessMeasuresSection" class="hidden">
-
-            <label class="font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
-                Access Control Measures
-            </label>
-
-            <div id="accessMeasuresContainer" class="space-y-2">
-                <div class="flex items-center space-x-2">
-                    <input type="text" name="access_measures[]" placeholder="Enter Access Control Measure"
-                        class="section-access p-2 border rounded-lg w-full">
-                    <button type="button" class="removeMeasure px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 hidden">
-                        Remove
-                    </button>
-                </div>
-            </div>
-
-            <button type="button" id="addAccessMeasure"
-                class="mt-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-purple-700">
-                + Add More
-            </button>
-        </div>
-
-    </div>
-</div>
-
-{{-- SCRIPT --}}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const accessControl = document.getElementById('access_control');
-    const measuresSection = document.getElementById('accessMeasuresSection');
-    const addButton = document.getElementById('addAccessMeasure');
-    const measuresContainer = document.getElementById('accessMeasuresContainer');
-
-    // Show/hide measures section based on selection
-    accessControl.addEventListener('change', function () {
-        if (this.value === "1") {
-            measuresSection.classList.remove('hidden');
-        } else {
-            measuresSection.classList.add('hidden');
-            // Remove all except the first input
-            measuresContainer.innerHTML = `<div class="flex items-center space-x-2">
-                <input type="text" name="access_measures[]" placeholder="Enter Access Control Measure" class="section-access p-2 border rounded-lg w-full">
-                <button type="button" class="removeMeasure px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 hidden">Remove</button>
-            </div>`;
-        }
-    });
-
-    // Add new measure input dynamically
-    addButton.addEventListener('click', function () {
-        const div = document.createElement('div');
-        div.className = 'flex items-center space-x-2';
-        div.innerHTML = `
-            <input type="text" name="access_measures[]" placeholder="Enter Access Control Measure" class="section-access p-2 border rounded-lg w-full">
-            <button type="button" class="removeMeasure px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600">Remove</button>
-        `;
-        measuresContainer.appendChild(div);
-
-        // Add event listener for the remove button
-        div.querySelector('.removeMeasure').addEventListener('click', function () {
-            div.remove();
-        });
-    });
-
-    // Optional: Add remove listener to initial hidden remove button
-    const initialRemove = measuresContainer.querySelector('.removeMeasure');
-    initialRemove.addEventListener('click', function () {
-        measuresContainer.removeChild(this.parentElement);
-    });
-});
-</script>
 
 
-
-     {{-- SECTION 7: SOPs & Supporting Documents --}}
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
-    <h2 class="text-xl font-bold text-orange-500 flex items-center mb-4">
-        <i data-feather="upload" class="w-5 h-5 mr-2"></i> SOPs & Supporting Documents
-    </h2>
-
-    {{-- SOPs Container --}}
-    <div id="sopContainer" class="space-y-4">
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sop-entry">
-            <input type="text" name="sop_name[]" placeholder="SOP Name" class="section-sop p-2 border rounded-lg w-full">
-            <input type="text" name="sop_version[]" placeholder="SOP Version" class="section-sop p-2 border rounded-lg w-full">
-            <input type="text" name="sop_owner[]" placeholder="SOP Owner/Author" class="section-sop p-2 border rounded-lg w-full">
-            <input type="date" name="sop_date[]" placeholder="Date of Issue" class="section-sop p-2 border rounded-lg w-full">
-            <input type="file" name="sop_file[]" class="p-2 border rounded-lg w-full">
-            <input type="file" name="supporting_documents[]" class="p-2 border rounded-lg w-full">
-            <button type="button" class="removeSOP px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 self-start mt-2">
-                Remove
-            </button>
-        </div>
-
-    </div>
-
-    <button type="button" id="addSOP" class="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-indigo-700">
-        + Add SOP
-    </button>
-</div>
-
-{{-- SCRIPT --}}
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const addButton = document.getElementById('addSOP');
-    const sopContainer = document.getElementById('sopContainer');
-
-    // Function to create a new SOP entry
-    const createSOPEntry = () => {
-        const div = document.createElement('div');
-        div.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sop-entry';
-
-        div.innerHTML = `
-            <input type="text" name="sop_name[]" placeholder="SOP Name" class="section-sop p-2 border rounded-lg w-full">
-            <input type="text" name="sop_version[]" placeholder="SOP Version" class="section-sop p-2 border rounded-lg w-full">
-            <input type="text" name="sop_owner[]" placeholder="SOP Owner/Author" class="section-sop p-2 border rounded-lg w-full">
-            <input type="date" name="sop_date[]" placeholder="Date of Issue" class="section-sop p-2 border rounded-lg w-full">
-            <input type="file" name="sop_file[]" class="p-2 border rounded-lg w-full">
-            <input type="file" name="supporting_documents[]" class="p-2 border rounded-lg w-full">
-            <button type="button" class="removeSOP px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 self-start mt-2">
-                Remove
-            </button>
-        `;
-
-        // Add remove functionality
-        div.querySelector('.removeSOP').addEventListener('click', function () {
-            div.remove();
-        });
-
-        return div;
-    };
-
-    // Add SOP button click
-    addButton.addEventListener('click', function () {
-        sopContainer.appendChild(createSOPEntry());
-    });
-
-    // Remove functionality for initial SOP entry
-    sopContainer.querySelectorAll('.removeSOP').forEach(btn => {
-        btn.addEventListener('click', function () {
-            btn.parentElement.remove();
-        });
-    });
-});
-</script>
 
 
 
@@ -785,31 +831,17 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-orange-500 flex items-center">
-                    <i data-feather="alert-triangle" class="w-5 h-5 mr-2"></i> Risk Reporting & Mitigation
+                    <i data-feather="alert-triangle" class="w-5 h-5 mr-2"></i> Process Risk Reporting 
                 </h2>
-                <span class="text-sm font-semibold text-gray-600" id="riskProgressLabel">0%</span>
+                
             </div>
             <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
                 <div class="bg-red-700 h-2 rounded-full" id="riskProgress" style="width: 0%"></div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <textarea name="risk_report[]" placeholder="Risk Reporting" rows="4" class="section-risk p-2 border rounded-lg w-full"></textarea>
-                <textarea name="risk_mitigation[]" placeholder="Risk Mitigation Strategy" rows="4" class="section-risk p-2 border rounded-lg w-full"></textarea>
-            </div>
-        </div>
 
-
-<div class="flex justify-end mt-6">
-    <button type="submit" form="progressForm" 
-        class="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 flex items-center">
-        <i data-feather="check" class="w-5 h-5 mr-2"></i> Submit
-    </button>
+<div class="w-full mb-4">
+    <textarea name="risk_report[]" placeholder="Risk Reporting" rows="4" class="section-risk p-2 border rounded-lg w-full"></textarea>
 </div>
-
-
-    </form>
-</div>
-
 
 {{-- Feather Icons --}}
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -877,5 +909,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateOverallProgress();
 </script>
+
+
+
+<div class="flex justify-end mt-6">
+    <button type="submit" form="progressForm" 
+        class="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 flex items-center">
+        <i data-feather="check" class="w-5 h-5 mr-2"></i> Submit
+    </button>
+</div>
+
+</form>
 
 @endsection

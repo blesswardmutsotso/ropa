@@ -6,23 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('ropas', function (Blueprint $table) {
-             $table->string('status')->default('Pending')->after('user_id');
+            $table->enum('risk_level', ['Low', 'Medium', 'High', 'Critical'])
+                ->nullable()
+                ->default(null)
+                ->after('risk_report');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('ropas', function (Blueprint $table) {
-            //
+            $table->dropColumn('risk_level');
         });
     }
 };

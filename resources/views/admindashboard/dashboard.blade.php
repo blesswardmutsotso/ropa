@@ -34,7 +34,6 @@
                         <span>Logout</span>
                     </button>
                 </form>
-
             </div>
         </div>
     </div>
@@ -53,107 +52,125 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
 
         <!-- Total ROPA Records -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-            <div class="flex justify-between items-center mb-2">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-between">
+            <div>
                 <span class="text-lg font-semibold text-gray-700 dark:text-gray-200">Total ROPA Records</span>
-                <i data-feather="database" class="w-6 h-6 text-orange-500"></i>
+                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ \App\Models\Ropa::count() }}</div>
             </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {{ \App\Models\Ropa::count() }}
-            </div>
+            <i data-feather="database" class="w-6 h-6 text-orange-500"></i>
         </div>
 
         <!-- Pending Reviews -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-            <div class="flex justify-between items-center mb-2">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-between">
+            <div>
                 <span class="text-lg font-semibold text-gray-700 dark:text-gray-200">Pending Reviews</span>
-                <i data-feather="clock" class="w-6 h-6 text-yellow-500"></i>
+                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ \App\Models\Ropa::where('status', 'Pending')->count() }}</div>
             </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                {{ \App\Models\Ropa::where('status', 'Pending')->count() }}
-            </div>
+            <i data-feather="clock" class="w-6 h-6 text-yellow-500"></i>
         </div>
 
         <!-- Overdue Reviews -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-            <div class="flex justify-between items-center mb-2">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-between">
+            <div>
                 <span class="text-lg font-semibold text-gray-700 dark:text-gray-200">Overdue Reviews</span>
-                <i data-feather="alert-triangle" class="w-6 h-6 text-red-600"></i>
+                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $overdueReviews ?? 0 }}</div>
             </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $overdueReviews ?? 0 }}</div>
+            <i data-feather="alert-triangle" class="w-6 h-6 text-red-600"></i>
         </div>
 
         <!-- Completed Tasks -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-            <div class="flex justify-between items-center mb-2">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 flex items-center justify-between">
+            <div>
                 <span class="text-lg font-semibold text-gray-700 dark:text-gray-200">Tasks Completed</span>
-                <i data-feather="check-circle" class="w-6 h-6 text-green-600"></i>
+                <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $tasksCompleted ?? 0 }}</div>
             </div>
-            <div class="text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $tasksCompleted ?? 0 }}</div>
+            <i data-feather="check-circle" class="w-6 h-6 text-green-600"></i>
         </div>
+
     </div>
 
     <!-- Risk & Activity Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Risk Distribution -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-orange-500"></i> 
-                Risk Distribution
-            </h2>
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+    <h2 class="text-xl font-bold mb-4 flex items-center">
+        <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-orange-500"></i> Risk Distribution
+    </h2>
 
-            <div class="space-y-4">
-                @foreach(['High Risk', 'Medium Risk', 'Low Risk'] as $risk)
-                    <div class="flex justify-between items-center">
-                        <span class="font-semibold">{{ $risk }}</span>
-                        <span class="text-gray-700 dark:text-gray-300">
-                            {{ ${str_replace(' ', '', strtolower($risk))} ?? 0 }}%
-                        </span>
-                    </div>
-                @endforeach
+    <div class="space-y-4">
+        @foreach(['Critical Risk', 'High Risk', 'Medium Risk', 'Low Risk'] as $risk)
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+
+                    @if($risk == 'Critical Risk')
+                        <i data-feather="alert-circle" class="w-4 h-4 text-purple-700"></i>
+                    @elseif($risk == 'High Risk')
+                        <i data-feather="alert-octagon" class="w-4 h-4 text-red-600"></i>
+                    @elseif($risk == 'Medium Risk')
+                        <i data-feather="alert-triangle" class="w-4 h-4 text-yellow-500"></i>
+                    @else
+                        <i data-feather="check-circle" class="w-4 h-4 text-green-600"></i>
+                    @endif
+
+                    <span class="font-semibold">{{ $risk }}</span>
+                </div>
+
+                <span class="text-gray-700 dark:text-gray-300">
+                    {{ ${str_replace(' ', '', strtolower($risk))} ?? 0 }}%
+                </span>
             </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h2 class="text-xl font-bold mb-4 flex items-center">
-                <i data-feather="activity" class="w-6 h-6 mr-2 text-orange-500"></i> 
-                Recent Submissions
-            </h2>
-
-            <div class="space-y-4">
-
-                @php
-                    $recentRopas = \App\Models\Ropa::with('user')
-                        ->latest('date_submitted')
-                        ->take(5)
-                        ->get();
-                @endphp
-
-                @forelse($recentRopas as $ropa)
-                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-semibold">{{ $ropa->organisation_name }}</span>
-                            <span class="text-sm text-gray-500 dark:text-gray-300">
-                                {{ $ropa->date_submitted ? $ropa->date_submitted->format('d M Y, h:i A') : '—' }}
-                            </span>
-                        </div>
-
-                        <p class="text-sm text-gray-600 dark:text-gray-300">
-                            {{ $ropa->department_name ?? $ropa->other_department ?? '—' }} • 
-                            {{ $ropa->user->name ?? '—' }} — 
-                            <span class="font-semibold">{{ $ropa->status ?? 'Pending' }}</span>
-                        </p>
-                    </div>
-                @empty
-                    <p class="text-gray-500 dark:text-gray-300">No recent activities.</p>
-                @endforelse
-            </div>
-        </div>
-
+        @endforeach
     </div>
 </div>
+
+        <!-- Recent Activity -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+    <h2 class="text-xl font-bold mb-4 flex items-center">
+        <i data-feather="activity" class="w-6 h-6 mr-2 text-orange-500"></i> Recent Submissions
+    </h2>
+
+    <div class="space-y-4">
+        @php
+            $recentRopas = \App\Models\Ropa::with('user')
+                ->latest('date_submitted')
+                ->take(5)
+                ->get();
+        @endphp
+
+        @forelse($recentRopas as $ropa)
+            <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg flex justify-between items-center">
+                <div>
+                    <!-- Organisation in green -->
+                    <span class="font-semibold text-green-600">{{ $ropa->organisation_name }}</span>
+
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
+
+                        <!-- Department in orange-500 -->
+                        <span class="text-orange-500">
+                            {{ $ropa->department_name ?? $ropa->other_department ?? '—' }}
+                        </span>
+
+                        • {{ $ropa->user->name ?? '—' }} — 
+
+                        <!-- Pending in red -->
+                        <span class="font-semibold 
+                            @if(($ropa->status ?? 'Pending') == 'Pending') text-red-600 @endif">
+                            {{ $ropa->status ?? 'Pending' }}
+                        </span>
+                    </p>
+                </div>
+
+                <span class="text-sm text-gray-500 dark:text-gray-300">
+                    {{ $ropa->date_submitted ? $ropa->date_submitted->format('d M Y, h:i A') : '—' }}
+                </span>
+            </div>
+        @empty
+            <p class="text-gray-500 dark:text-gray-300">No recent activities.</p>
+        @endforelse
+    </div>
+</div>
+
 
 <script>
     feather.replace();

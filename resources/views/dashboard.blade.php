@@ -71,7 +71,7 @@
 
     <!-- 4 Statistic Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-       @php
+     @php
     $userId = Auth::id();
 
     // Total records for this user
@@ -87,12 +87,13 @@
         ->where('status', \App\Models\Ropa::STATUS_REVIEWED)
         ->count();
 
-    // Overdue = pending + older than 7 days
+    // Overdue = pending + created more than 1 day ago
     $overdueReviews = \App\Models\Ropa::where('user_id', $userId)
         ->where('status', \App\Models\Ropa::STATUS_PENDING)
-        ->where('date_submitted', '<=', now()->subDays(1))
+        ->where('created_at', '<=', now()->subDay())
         ->count();
 @endphp
+
 
 
         <!-- Total ROPA Records -->
@@ -202,56 +203,59 @@
 
 
 
+<!-- Recent ROPA Submissions -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
+    <h2 class="text-xl font-bold mb-4 flex items-center text-orange-500">
+        <i data-feather="activity" class="w-6 h-6 mr-2 text-orange-500"></i>
+        Recent ROPA Submissions
+    </h2>
 
-        <!-- Recent ROPA Submissions -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
-            <h2 class="text-xl font-bold mb-4 flex items-center text-orange-500">
-                <i data-feather="activity" class="w-6 h-6 mr-2 text-orange-500"></i> Recent ROPA Submissions
-            </h2>
+    @php
+        use App\Models\Ropa;
 
-            <div class="space-y-4">
-                @php
-                    $recentRopas = \App\Models\Ropa::where('user_id', Auth::id())
-                        ->orderBy('date_submitted', 'desc')
-                        ->take(5)
-                        ->get();
-                @endphp
+        $recentRopas = Ropa::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+    @endphp
 
-                @forelse ($recentRopas as $ropa)
-                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-l-4 border-orange-500">
-                        <div class="flex justify-between mb-1">
-                           <span class="font-semibold">
-    {{ $ropa->ropa_create['organisation_name'] ?? $ropa->ropa_create['other_organisation_name'] ?? 'Unnamed Submission' }}
-</span>
+    <div class="space-y-4">
+        @forelse ($recentRopas as $ropa)
+            <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-l-4 border-orange-500">
+                
+                <!-- TOP: Org Name + Timestamp -->
+                <div class="flex justify-between mb-1">
+                    <span class="font-semibold">
+                        {{ $ropa->organisation_name 
+                            ?? $ropa->other_organisation_name 
+                            ?? 'Unnamed Submission' }}
+                    </span>
 
-<span class="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-1">
-    <i data-feather="clock" class="w-4 h-4 text-orange-500"></i>
-    {{ $ropa->created_at
-        ? $ropa->created_at->format('d/m/Y • h:i A')
-        : 'N/A' }}
-</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-300 flex items-center gap-1">
+                        <i data-feather="clock" class="w-4 h-4 text-orange-500"></i>
+                        {{ $ropa->created_at ? $ropa->created_at->format('d/m/Y • h:i A') : 'N/A' }}
+                    </span>
+                </div>
 
-
-                        </div>
-<p class="text-sm text-gray-600 dark:text-gray-300">
-    {{ $ropa->ropa_create['department_name'] ?? 'Unknown Dept' }} • 
-    {{ $ropa->user->name ?? 'N/A' }} — 
-    <span class="font-semibold {{ strtolower($ropa->status) === 'reviewed' ? 'text-green-600' : 'text-yellow-600' }}">
-        {{ ucfirst($ropa->status ?? 'Pending') }}
-    </span>
-</p>
-
-                    </div>
-                @empty
-                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-                        No recent ROPA submissions found.
-                    </p>
-                @endforelse
+                <!-- BOTTOM: Department • User • Status -->
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    {{ $ropa->department ?? $ropa->other_department ?? 'Unknown Dept' }}
+                    • {{ $ropa->user->name ?? 'N/A' }} —
+                    
+                    <span class="font-semibold 
+                        {{ $ropa->status === Ropa::STATUS_REVIEWED ? 'text-green-600' : 'text-yellow-600' }}">
+                        {{ $ropa->status }}
+                    </span>
+                </p>
             </div>
-        </div>
-
+        @empty
+            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
+                No recent ROPA submissions found.
+            </p>
+        @endforelse
     </div>
 </div>
+
 
 <!-- Feather Icons -->
 <script src="https://unpkg.com/feather-icons"></script>

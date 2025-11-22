@@ -1,13 +1,23 @@
 @extends('layouts.admin')
 
-@section('title', 'Review Management')
+@section('title', 'ROPA Assessments')
 
 @section('content')
 <div class="container mx-auto p-4 sm:p-6">
+
     <!-- Page Header -->
-    <h2 class="text-2xl font-bold mb-6 text-indigo-700 flex items-center">
-        <i data-feather="message-square" class="w-6 h-6 mr-2"></i> Processing Activities Review Management
-    </h2>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <h2 class="text-2xl font-bold text-orange-500 flex items-center">
+            <i data-feather="file-text" class="w-6 h-6 mr-2"></i> ROPA Assessments
+        </h2>
+
+        <!-- EXPORT BUTTON -->
+        <a href="{{ route('admin.reviews.export.excel') }}"
+           class="mt-3 sm:mt-0 bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 flex items-center gap-2">
+            <i data-feather="download" class="w-4 h-4"></i>
+            Export to Excel
+        </a>
+    </div>
 
     <!-- Success / Error Messages -->
     @if(session('success'))
@@ -23,130 +33,145 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-        <!-- Total Reviews -->
-        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-indigo-600">
-            <div class="p-2 sm:p-3 bg-indigo-100 rounded-full">
-                <i data-feather="file-text" class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600"></i>
+
+        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-orange-500">
+            <div class="p-2 bg-orange-100 rounded-full">
+                <i data-feather="file-text" class="w-6 h-6 text-orange-500"></i>
             </div>
             <div>
-                <h3 class="text-xs sm:text-sm font-semibold text-gray-500 uppercase">Total Reviews</h3>
-                <p class="text-lg sm:text-xl font-bold text-gray-800">{{ \App\Models\Review::count() }}</p>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Total Reviews</h3>
+                <p class="text-xl font-bold text-gray-800">{{ \App\Models\Review::count() }}</p>
             </div>
         </div>
 
-        <!-- Pending Reviews -->
-        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-yellow-500">
-            <div class="p-2 sm:p-3 bg-yellow-100 rounded-full">
-                <i data-feather="clock" class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500"></i>
+        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-blue-500">
+            <div class="p-2 bg-blue-100 rounded-full">
+                <i data-feather="star" class="w-6 h-6 text-blue-500"></i>
             </div>
             <div>
-                <h3 class="text-xs sm:text-sm font-semibold text-gray-500 uppercase">Pending Reviews</h3>
-                <p class="text-lg sm:text-xl font-bold text-gray-800">{{ \App\Models\Review::where('review_status','Pending')->count() }}</p>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Avg. Score</h3>
+                <p class="text-xl font-bold text-gray-800">
+                    {{ number_format(\App\Models\Review::avg('score') ?? 0, 1) }}
+                </p>
             </div>
         </div>
 
-        <!-- Approved Reviews -->
-        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-green-600">
-            <div class="p-2 sm:p-3 bg-green-100 rounded-full">
-                <i data-feather="check-circle" class="w-5 h-5 sm:w-6 sm:h-6 text-green-600"></i>
+        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-green-500">
+            <div class="p-2 bg-green-100 rounded-full">
+                <i data-feather="check-circle" class="w-6 h-6 text-green-500"></i>
             </div>
             <div>
-                <h3 class="text-xs sm:text-sm font-semibold text-gray-500 uppercase">Approved Reviews</h3>
-                <p class="text-lg sm:text-xl font-bold text-gray-800">{{ \App\Models\Review::where('review_status','Approved')->count() }}</p>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">DPA Completed</h3>
+                <p class="text-xl font-bold text-gray-800">
+                    {{ \App\Models\Review::where('data_processing_agreement', 1)->count() }}
+                </p>
             </div>
         </div>
 
-        <!-- High Risk Reviews -->
-        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-red-500">
-            <div class="p-2 sm:p-3 bg-red-100 rounded-full">
-                <i data-feather="alert-triangle" class="w-5 h-5 sm:w-6 sm:h-6 text-red-500"></i>
+        <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-purple-500">
+            <div class="p-2 bg-purple-100 rounded-full">
+                <i data-feather="shield" class="w-6 h-6 text-purple-500"></i>
             </div>
             <div>
-                <h3 class="text-xs sm:text-sm font-semibold text-gray-500 uppercase">High Risk Reviews</h3>
-                <p class="text-lg sm:text-xl font-bold text-gray-800">{{ \App\Models\Review::where('review_status','High Risk')->count() }}</p>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">DPIA Conducted</h3>
+                <p class="text-xl font-bold text-gray-800">
+                    {{ \App\Models\Review::where('data_protection_impact_assessment', 1)->count() }}
+                </p>
             </div>
         </div>
+
     </div>
-
-    <!-- Search Bar -->
-    <form method="GET" action="{{ route('reviews.index') }}" class="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-        <input 
-            type="text" 
-            name="search" 
-            value="{{ request('search') }}" 
-            placeholder="Search by ROPA, Reviewer, or Status..." 
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm sm:text-base"
-        >
-        <button 
-            type="submit" 
-            class="flex items-center justify-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition text-sm sm:text-base"
-        >
-            <i data-feather="search" class="w-4 h-4 mr-1"></i> Search
-        </button>
-    </form>
 
     <!-- Reviews Table -->
     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
         <table class="min-w-full table-auto border-collapse text-sm sm:text-base">
-            <thead class="bg-indigo-700 text-white">
+            <thead class="bg-orange-500 text-white">
                 <tr>
-                    <th class="py-3 px-4 text-left">ROPA</th>
                     <th class="py-3 px-4 text-left">Reviewer</th>
-                    <th class="py-3 px-4 text-left">Status</th>
-                    <th class="py-3 px-4 text-left">Risk Score</th>
-                    <th class="py-3 px-4 text-left">Remarks</th>
-                    <th class="py-3 px-4 text-left">Reviewed At</th>
+                    <th class="py-3 px-4 text-left">ROPA ID</th>
+                    <th class="py-3 px-4 text-left">Average Score</th>
+                    <th class="py-3 px-4 text-left">DPA</th>
+                    <th class="py-3 px-4 text-left">DPIA</th>
+                    <th class="py-3 px-4 text-left">Created</th>
                     <th class="py-3 px-4 text-center">Actions</th>
                 </tr>
             </thead>
+
             <tbody>
                 @forelse ($reviews as $review)
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="py-3 px-4 font-semibold">{{ $review->ropa->organisation_name ?? 'N/A' }}</td>
-                        <td class="py-3 px-4">{{ $review->reviewed_by ?? '—' }}</td>
+
                         <td class="py-3 px-4">
-                            <span class="px-2 py-1 text-xs rounded-full {{ 
-                                $review->review_status == 'Approved' ? 'bg-green-100 text-green-800' :
-                                ($review->review_status == 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                {{ $review->review_status ?? 'Pending' }}
+                            {{ $review->user->name ?? 'Admin' }}
+                        </td>
+
+                        <td class="py-3 px-4">
+                            ROPA #{{ $review->ropa->id }}
+                        </td>
+
+                        <td class="py-3 px-4 font-semibold text-blue-600">
+                            {{ $review->average_score ?? '—' }}
+                        </td>
+
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs
+                                {{ $review->data_processing_agreement ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ $review->data_processing_agreement ? 'Yes' : 'No' }}
                             </span>
                         </td>
-                        <td class="py-3 px-4 text-center">{{ $review->risk_score ?? '—' }}</td>
-                        <td class="py-3 px-4">{{ Str::limit($review->remarks, 50) }}</td>
-                        <td class="py-3 px-4 whitespace-nowrap text-gray-600">{{ $review->created_at->format('d M Y') }}</td>
-                        <td class="py-3 px-4 text-center flex justify-center space-x-2">
-                            <a href="{{ route('reviews.show', $review->id) }}" class="text-blue-600 hover:text-blue-800">
-                                <i data-feather="eye"></i>
-                            </a>
-                            <a href="{{ route('reviews.edit', $review->id) }}" class="text-yellow-600 hover:text-yellow-800">
-                                <i data-feather="edit"></i>
-                            </a>
-                            <form action="{{ route('reviews.destroy', $review->id) }}" method="POST" 
-                                  onsubmit="return confirm('Delete this review?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-800">
-                                    <i data-feather="trash-2"></i>
-                                </button>
-                            </form>
+
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs
+                                {{ $review->data_protection_impact_assessment ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ $review->data_protection_impact_assessment ? 'Yes' : 'No' }}
+                            </span>
                         </td>
+
+                        <td class="py-3 px-4 text-gray-600">
+                            {{ $review->created_at->format('d M Y') }}
+                        </td>
+
+                        <td class="py-3 px-4">
+                            <div class="flex justify-center space-x-3">
+
+                                <a href="{{ route('admin.reviews.show', $review->id) }}"
+                                   class="text-orange-500 hover:text-orange-600 flex items-center gap-1">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </a>
+
+                                <form method="POST" action="{{ route('admin.reviews.destroy', $review->id) }}"
+                                      onsubmit="return confirm('Delete this review?')">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button type="submit" class="text-red-600 hover:text-red-800 flex items-center">
+                                        <i data-feather="trash" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="py-4 text-center text-gray-500">No reviews found.</td>
+                        <td colspan="7" class="py-4 text-center text-gray-500">
+                            No reviews found.
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    <!-- Pagination -->
     <div class="mt-4">
         {{ $reviews->links() }}
     </div>
+
 </div>
 
 <script>
     feather.replace();
 </script>
+
 @endsection

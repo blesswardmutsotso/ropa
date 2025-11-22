@@ -33,6 +33,7 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+
         <!-- Total Users -->
         <div class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border-l-4 border-orange-500">
             <div class="p-2 sm:p-3 bg-orange-100 rounded-full">
@@ -116,54 +117,93 @@
             <tbody>
                 @forelse ($users as $user)
                     <tr class="border-b hover:bg-gray-50">
+
                         <td class="py-3 px-4 font-semibold">{{ $user->name }}</td>
                         <td class="py-3 px-4 truncate max-w-[150px]">{{ $user->email }}</td>
+
                         <td class="py-3 px-4">
                             <span class="{{ $user->user_type == 1 ? 'text-green-600 font-semibold' : 'text-gray-700' }}">
                                 {{ $user->user_type == 1 ? 'Admin' : 'User' }}
                             </span>
                         </td>
+
                         <td class="py-3 px-4">{{ $user->department ?? '—' }}</td>
+
                         <td class="py-3 px-4">
                             <span class="px-2 py-1 text-xs sm:text-sm rounded-full {{ $user->active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                 {{ $user->active ? 'Active' : 'Deactivated' }}
                             </span>
                         </td>
+
                         <td class="py-3 px-4 whitespace-nowrap text-gray-600">{{ $user->created_at->format('d M Y') }}</td>
+
+                        <!-- ACTION BUTTONS -->
                         <td class="py-3 px-4">
                             <div class="flex justify-center space-x-2 sm:space-x-3">
+
                                 <!-- View -->
-                                <a href="{{ route('admin.users.show', $user->id) }}" class="text-orange-500 hover:text-orange-600" title="View">
-                                    <i data-feather="eye"></i>
+                                <a href="{{ route('admin.users.show', $user->id) }}"
+                                   class="flex items-center gap-1 text-orange-500 hover:text-orange-600"
+                                   title="View">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline text-xs">View</span>
                                 </a>
 
                                 <!-- Edit -->
-                                <a href="{{ route('admin.users.edit', $user->id) }}" class="text-orange-400 hover:text-orange-500" title="Edit">
-                                    <i data-feather="edit"></i>
+                                <a href="{{ route('admin.users.edit', $user->id) }}"
+                                   class="flex items-center gap-1 text-orange-400 hover:text-orange-500"
+                                   title="Edit">
+                                    <i data-feather="edit" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline text-xs">Edit</span>
                                 </a>
 
                                 <!-- Toggle Status -->
-                                <form action="{{ route('admin.users.toggleStatus', $user->id) }}" method="POST"
-                                      onsubmit="return confirm('Are you sure you want to {{ $user->active ? 'deactivate' : 'activate' }} this account?')">
+                                <form 
+                                    action="{{ route('admin.users.toggleStatus', $user->id) }}" 
+                                    method="POST"
+                                    onsubmit="return confirm('Are you sure you want to {{ $user->active ? 'deactivate' : 'activate' }} this account?')"
+                                    class="flex items-center gap-1"
+                                >
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="{{ $user->active ? 'text-gray-600' : 'text-green-600' }} hover:text-gray-900" 
+
+                                    <button type="submit" 
+                                            class="flex items-center gap-1 {{ $user->active ? 'text-gray-600' : 'text-green-600' }} hover:text-gray-900"
                                             title="{{ $user->active ? 'Deactivate' : 'Activate' }}">
-                                        <i data-feather="{{ $user->active ? 'slash' : 'check' }}"></i>
+                                        <i data-feather="{{ $user->active ? 'slash' : 'check' }}" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline text-xs">
+                                            {{ $user->active ? 'Deactivate' : 'Activate' }}
+                                        </span>
                                     </button>
                                 </form>
 
-                                <!-- Delete -->
-                                <form action="#" method="POST" onsubmit="return confirm('Delete this user?')">
+                                <!-- 2FA TOGGLE BUTTON -->
+                                <form 
+                                    action="{{ route('2fa.toggle') }}" 
+                                    method="POST"
+                                    onsubmit="return confirm('Toggle Two-Factor Authentication for this user?')"
+                                    class="flex items-center gap-1"
+                                >
                                     @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
-                                        <i data-feather="trash-2"></i>
+                                    @method('PATCH')
+
+                                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+
+                                    <button type="submit" 
+                                            class="flex items-center gap-1 {{ $user->two_factor_enabled ? 'text-blue-600' : 'text-gray-500' }} hover:text-blue-800"
+                                            title="Toggle 2FA">
+                                        <i data-feather="{{ $user->two_factor_enabled ? 'lock' : 'unlock' }}" class="w-4 h-4"></i>
+                                        <span class="hidden sm:inline text-xs">
+                                            {{ $user->two_factor_enabled ? '2FA On' : '2FA Off' }}
+                                        </span>
                                     </button>
                                 </form>
+
                             </div>
                         </td>
+
                     </tr>
+
                 @empty
                     <tr>
                         <td colspan="8" class="py-4 text-center text-gray-500">No users found.</td>
@@ -182,4 +222,5 @@
 <script>
     feather.replace();
 </script>
+
 @endsection

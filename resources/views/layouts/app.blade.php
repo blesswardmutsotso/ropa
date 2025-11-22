@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>@yield('title', 'WhatsApp Dashboard')</title>
+    <title>@yield('title', 'ROPA')</title>
 
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('favicon.png') }}">
@@ -19,9 +19,15 @@
         <aside class="w-64 bg-orange-600 text-white p-4 flex flex-col items-center fixed left-0 top-0 h-screen overflow-y-auto">
 
             <!-- Logo -->
-            <div class="mb-6">
-                <img src="{{ asset('favicon.png') }}" alt="Logo" class="w-24 h-24 rounded-full shadow-lg">
-            </div>
+            <!-- Logo -->
+<!-- Logo -->
+<!-- Logo -->
+<div class="mb-6">
+    <img src="{{ asset('logo.jpg') }}" alt="Logo" class="w-32 h-20 rounded-lg shadow-md border-2 border-white dark:border-gray-800 object-cover">
+</div>
+
+
+
 
             <ul class="w-full">
                 <li class="mb-2">
@@ -37,7 +43,7 @@
                 </li>
 
 <li class="mb-2">
-    <a href="{{ route('reviews.index') }}" 
+    <a href="" 
        class="flex items-center py-2 px-3 rounded hover:bg-orange-500 transition-colors duration-200">
         <i data-feather="check-square" class="w-5 h-5 mr-2"></i> Reviews
     </a>
