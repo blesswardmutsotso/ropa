@@ -50,6 +50,23 @@
 </li>
 
 
+<li class="mb-2">
+    <a href="{{ route('ticket.index') }}"
+       class="flex items-center py-2 px-3 rounded hover:bg-orange-500 transition-colors duration-200 w-full text-left">
+        <i data-feather="tag" class="w-5 h-5 mr-2"></i> Add Ticket
+    </a>
+</li>
+
+
+
+
+
+
+
+
+
+
+
                 <!-- Account Settings Button -->
                 <li class="mb-2 w-full">
                     <a href="{{ route('profile.edit') }}" class="w-full flex items-center py-2 px-3 rounded hover:bg-orange-500 transition-colors duration-200 text-left">

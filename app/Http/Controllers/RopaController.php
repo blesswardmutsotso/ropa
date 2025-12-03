@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Review;
+use Spatie\SimpleExcel\SimpleExcelWriter;
 use App\Notifications\NewRopaSubmitted;
 
 class RopaController extends Controller
@@ -229,4 +230,104 @@ public function store(Request $request)
             'status' => 'nullable|string|in:Pending,Reviewed'
         ]);
     }
+
+public function export($id)
+{
+    $ropa = Ropa::with('user')->findOrFail($id);
+
+    $fileName = 'ropa_' . $ropa->id . '_export.xlsx';
+
+    if (ob_get_length()) {
+        ob_clean();
+    }
+
+    return SimpleExcelWriter::streamDownload($fileName)
+        ->addHeader([
+            'ID',
+            'User',
+            'Status',
+
+            'Organisation Name',
+            'Department',
+
+            'Processes',
+            'Data Sources',
+            'Data Formats',
+            'Information Nature',
+            'Personal Data Categories',
+
+            'Information Shared',
+            'Sharing Local',
+            'Sharing Transborder',
+            'Access Control',
+
+            'Local Organizations',
+            'Transborder Countries',
+
+            'Risk Report',
+            'Records Count',
+            'Retention Period (Years)',
+            'Data Volume',
+            'Access Estimate',
+
+            'Created At'
+        ])
+        ->addRow([
+            (string) $ropa->id,
+            (string) optional($ropa->user)->name,
+            (string) $ropa->status,
+
+            $this->toString($ropa->organisation_name),
+            $this->toString($ropa->department),
+
+            $this->safeList($ropa->processes),
+            $this->safeList($ropa->data_sources),
+            $this->safeList($ropa->data_formats),
+            $this->safeList($ropa->information_nature),
+            $this->safeList($ropa->personal_data_categories),
+
+            $ropa->information_shared ? 'Yes' : 'No',
+            $ropa->sharing_local ? 'Yes' : 'No',
+            $ropa->sharing_transborder ? 'Yes' : 'No',
+            $ropa->access_control ? 'Yes' : 'No',
+
+            $this->safeList($ropa->local_organizations),
+            $this->safeList($ropa->transborder_countries),
+
+            $this->safeList($ropa->risk_report),
+            $this->safeList($ropa->records_count),
+            $this->safeList($ropa->retention_period_years),
+            $this->safeList($ropa->data_volume),
+            $this->safeList($ropa->access_estimate),
+
+            $ropa->created_at->toDateTimeString(),
+        ])
+        ->close();
+}
+
+
+/**
+ * Convert string or simple array to string.
+ */
+private function toString($value)
+{
+    return is_array($value) ? implode(', ', $value) : (string) $value;
+}
+
+/**
+ * Flatten nested arrays safely and convert to comma-separated string.
+ */
+private function safeList($value)
+{
+    if (is_null($value)) {
+        return '';
+    }
+
+    // Convert deeply nested arrays to a flat list
+    $flat = collect($value)->flatten()->filter()->all();
+
+    return implode(', ', $flat);
+}
+
+
 }

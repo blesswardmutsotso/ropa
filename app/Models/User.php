@@ -76,4 +76,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ropa::class);
     }
+
+    /**
+ * Relationship: User has many Reviews
+ */
+public function reviews()
+{
+    return $this->hasMany(\App\Models\Review::class);
+}
+
+
 }

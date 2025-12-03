@@ -6,7 +6,6 @@
 
 <div class="container mx-auto p-4 sm:p-6">
 
-
 <!-- Page Header -->
 <div class="flex justify-between items-center mb-6">
 
@@ -14,7 +13,6 @@
    class="bg-green-500 px-4 py-2 rounded-lg text-white hover:bg-green-600 flex items-center">
     <i data-feather="arrow-left" class="w-4 h-4 mr-1"></i> Back
 </a>
-
 
     <h2 class="text-2xl font-bold text-orange-500 flex items-center">
         <i data-feather="file-text" class="w-6 h-6 mr-2"></i> Review Details
@@ -32,7 +30,7 @@
 @php
     $ropa = $review->ropa;
     $sections = $ropa::sections();
-    $maxScore = 10; // max score per section
+    $maxScore = 10;
     $totalScore = $review->total_score;
     $averageScore = $review->average_score;
 
@@ -85,7 +83,7 @@
     </div>
 </div>
 
-<!-- SECTION SCORES / ROPA ANSWERS -->
+<!-- SECTION SCORES -->
 <form action="{{ route('admin.reviews.update', $review->id) }}" method="POST" class="mb-6">
     @csrf
     @method('PUT')
@@ -104,7 +102,6 @@
                     </p>
                     <p class="text-gray-600 text-sm">{{ renderValue($ropa->{$section}) }}</p>
 
-                    <!-- Editable score -->
                     <input type="number" 
                            name="section_scores[{{ $section }}]" 
                            value="{{ $review->section_scores[$section] ?? 0 }}" 
@@ -124,30 +121,50 @@
     </div>
 </form>
 
-<!-- COMPLIANCE CHECKS -->
+<!-- COMPLIANCE — UPDATED FOR FILE UPLOAD -->
 <div class="bg-white shadow-md rounded-lg p-5">
     <h3 class="text-lg font-bold mb-4 flex items-center text-orange-600">
-        <i data-feather="shield" class="w-5 h-5 mr-2"></i> Compliance
+        <i data-feather="shield" class="w-5 h-5 mr-2"></i> Compliance Documents
     </h3>
 
-    <form action="{{ route('admin.reviews.update.compliance', $review->id) }}" method="POST">
+    <form action="{{ route('admin.reviews.update.compliance', $review->id) }}" 
+          method="POST" 
+          enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
-        <div class="space-y-3">
-            <label class="flex items-center space-x-3">
-                <input type="checkbox" name="data_processing_agreement"
-                       class="h-4 w-4 text-orange-500"
-                       {{ $review->data_processing_agreement ? 'checked' : '' }}>
-                <span class="font-medium">Data Processing Agreement (DPA) Completed</span>
-            </label>
+        <div class="space-y-5">
 
-            <label class="flex items-center space-x-3">
-                <input type="checkbox" name="data_protection_impact_assessment"
-                       class="h-4 w-4 text-orange-500"
-                       {{ $review->data_protection_impact_assessment ? 'checked' : '' }}>
-                <span class="font-medium">Data Protection Impact Assessment (DPIA) Conducted</span>
-            </label>
+            <!-- DPA -->
+            <div>
+                <label class="font-medium">Data Processing Agreement (DPA)</label>
+                <input type="file" name="data_processing_agreement"
+                       class="mt-1 block w-full border rounded p-2">
+
+                @if ($review->data_processing_agreement)
+                    <a href="{{ asset('storage/'.$review->data_processing_agreement) }}"
+                       target="_blank"
+                       class="text-blue-600 underline text-sm mt-1 block">
+                        View Uploaded DPA
+                    </a>
+                @endif
+            </div>
+
+            <!-- DPIA -->
+            <div>
+                <label class="font-medium">Data Protection Impact Assessment (DPIA)</label>
+                <input type="file" name="data_protection_impact_assessment"
+                       class="mt-1 block w-full border rounded p-2">
+
+                @if ($review->data_protection_impact_assessment)
+                    <a href="{{ asset('storage/'.$review->data_protection_impact_assessment) }}"
+                       target="_blank"
+                       class="text-blue-600 underline text-sm mt-1 block">
+                        View Uploaded DPIA
+                    </a>
+                @endif
+            </div>
+
         </div>
 
         <button type="submit" 
@@ -156,7 +173,6 @@
         </button>
     </form>
 </div>
-```
 
 </div>
 

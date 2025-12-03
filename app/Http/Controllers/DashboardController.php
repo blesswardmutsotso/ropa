@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\UserStatusLog;
 use App\Models\Ropa;
+use App\Models\Review;
 use Illuminate\Support\Facades\DB;
 use App\Mail\UserStatusChanged;
+use App\Mail\UserAccountCreated;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -18,43 +20,117 @@ class DashboardController extends Controller
     /**
      * Show admin dashboard.
      */
-    public function admin()
-    {
-        $user = auth()->user();
-        return view('admindashboard.dashboard', compact('user'));
-    }
 
 
-    public function dashboard()
+    // public function admin()
+    // {
+    //     $user = auth()->user();
+    //     return view('admindashboard.dashboard', compact('user'));
+    // }
+
+
+public function admin()
 {
-    $user = auth()->user(); // Get the currently logged-in user
-
-    // Fetch the latest 5 notifications (or logs) for display
-    $notifications = UserStatusLog::with('user')
-        ->orderBy('created_at', 'desc')
-        ->take(5)
-        ->get();
-
-    // Return the dashboard view with variables
-    return view('dashboard', compact('user', 'notifications'));
+    return $this->reviewRiskDashboard();
 }
 
 
     /**
+ * Show the form for creating a new user.
+ */
+public function createUser()
+{
+    return view('admindashboard.user.create');
+}
+
+
+    
+
+    /**
      * Show user dashboard.
      */
-    public function user()
+  public function user()
+{
+    return $this->dashboard();
+}
+
+public function dashboard()
 {
     $user = auth()->user();
 
-    // Fetch latest 5 notifications for the user
+    // Latest notifications
     $notifications = UserStatusLog::with('user')
         ->orderBy('created_at', 'desc')
         ->take(5)
         ->get();
 
-    return view('dashboard', compact('user', 'notifications'));
+    // Only this user's reviews
+    $reviews = Review::where('user_id', $user->id)->get();
+
+    // Prevent divide-by-zero
+    $total = max($reviews->count(), 1);
+
+    // Correct: use total_score (NOT score)
+    $critical = $reviews->where('total_score', '<=', 50)->count();
+    $high     = $reviews->where('total_score', '>', 50)->where('total_score', '<=', 100)->count();
+    $medium   = $reviews->where('total_score', '>', 100)->where('total_score', '<=', 160)->count();
+    $low      = $reviews->where('total_score', '>', 160)->count();
+
+    // Percentages
+    $criticalRisk = round(($critical / $total) * 100, 1);
+    $highRisk     = round(($high / $total) * 100, 1);
+    $mediumRisk   = round(($medium / $total) * 100, 1);
+    $lowRisk      = round(($low / $total) * 100, 1);
+
+    return view('dashboard', compact(
+        'user',
+        'notifications',
+        'criticalRisk',
+        'highRisk',
+        'mediumRisk',
+        'lowRisk',
+        'reviews'
+    ));
 }
+
+
+
+
+
+public function userRiskDashboard()
+{
+    $user = auth()->user();
+
+    // Only fetch reviews belonging to the logged-in user
+    $reviews = Review::where('user_id', $user->id)->get();
+
+    // Prevent divide-by-zero
+    $total = max($reviews->count(), 1);
+
+    // Risk level groupings
+    $critical = $reviews->filter(fn($r) => $r->total_score <= 50)->count();
+    $high     = $reviews->filter(fn($r) => $r->total_score > 50 && $r->total_score <= 100)->count();
+    $medium   = $reviews->filter(fn($r) => $r->total_score > 100 && $r->total_score <= 160)->count();
+    $low      = $reviews->filter(fn($r) => $r->total_score > 160)->count();
+
+    // Percentages
+    $criticalRisk = round(($critical / $total) * 100, 1);
+    $highRisk     = round(($high / $total) * 100, 1);
+    $mediumRisk   = round(($medium / $total) * 100, 1);
+    $lowRisk      = round(($low / $total) * 100, 1);
+
+    // Return to user dashboard
+    return view('dashboard', compact(
+        'user',
+        'criticalRisk',
+        'highRisk',
+        'mediumRisk',
+        'lowRisk',
+        'reviews'
+    ));
+}
+
+
 
     /**
      * Show profile edit form.
@@ -328,6 +404,34 @@ public function store(Request $request)
         return back()->with('error', 'Failed to create user. Check logs for details.');
     }
 }
+
+public function reviewRiskDashboard()
+{
+    $user = auth()->user();
+    $reviews = Review::all();
+
+    $total = max($reviews->count(), 1);
+
+    $critical = $reviews->filter(fn($r) => $r->total_score <= 50)->count();
+    $high     = $reviews->filter(fn($r) => $r->total_score > 50 && $r->total_score <= 100)->count();
+    $medium   = $reviews->filter(fn($r) => $r->total_score > 100 && $r->total_score <= 160)->count();
+    $low      = $reviews->filter(fn($r) => $r->total_score > 160)->count();
+
+    $criticalRisk = round(($critical / $total) * 100, 1);
+    $highRisk     = round(($high / $total) * 100, 1);
+    $mediumRisk   = round(($medium / $total) * 100, 1);
+    $lowRisk      = round(($low / $total) * 100, 1);
+
+    return view('admindashboard.dashboard', compact(
+        'user',
+        'criticalRisk',
+        'highRisk',
+        'mediumRisk',
+        'lowRisk',
+        'reviews'
+    ));
+}
+
 
 
 

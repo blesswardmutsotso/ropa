@@ -110,4 +110,27 @@ public function show($id)
 }
 
 
+public function reviewRiskDashboard()
+{
+    $reviews = Review::all();
+
+    $total = max($reviews->count(), 1);
+
+    $critical = $reviews->filter(fn($r) => $r->total_score <= 50)->count();
+    $high     = $reviews->filter(fn($r) => $r->total_score > 50 && $r->total_score <= 100)->count();
+    $medium   = $reviews->filter(fn($r) => $r->total_score > 100 && $r->total_score <= 160)->count();
+    $low      = $reviews->filter(fn($r) => $r->total_score > 160)->count();
+
+    $criticalRisk = round(($critical / $total) * 100, 1);
+    $highRisk     = round(($high / $total) * 100, 1);
+    $mediumRisk   = round(($medium / $total) * 100, 1);
+    $lowRisk      = round(($low / $total) * 100, 1);
+
+    return view('admindashboard.dashboard', compact(
+        'criticalRisk', 'highRisk', 'mediumRisk', 'lowRisk', 'reviews'
+    ));
+}
+
+
+
 }

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'ACRN User Dashboard')
 
 @section('content')
 
@@ -136,69 +136,92 @@
 
     <!-- Two Cards Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <!-- Risk Distribution Card -->
+<!-- Risk Distribution Card -->
 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
     <h2 class="text-xl font-bold mb-4 flex items-center text-orange-500">
         <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-orange-500"></i> Risk Distribution
     </h2>
 
-    <div class="space-y-4">
-        <!-- Critical Risk -->
-        <div>
-            <div class="flex justify-between items-center mb-1">
-                <div class="flex items-center gap-2">
-                    <i data-feather="alert-triangle" class="w-4 h-4 text-red-700"></i>
-                    <span class="font-semibold text-red-700">Critical Risk</span>
-                </div>
-                <div><span class="font-bold text-red-700">0</span> (0%)</div>
-            </div>
-            <div class="w-full bg-red-100 h-2 rounded-full">
-                <div class="bg-red-700 h-2 rounded-full" style="width: 0%"></div>
-            </div>
+    @if ($reviews->count() === 0)
+        <!-- No data available message -->
+        <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+            <i data-feather="info" class="w-6 h-6 mx-auto mb-2"></i>
+            <p class="font-semibold">No risk data available.</p>
+            <p class="text-sm">Once reviews are submitted, risk distribution will appear here.</p>
         </div>
+    @else
+        <div class="space-y-4">
 
-        <!-- High Risk -->
-        <div>
-            <div class="flex justify-between items-center mb-1">
-                <div class="flex items-center gap-2">
-                    <i data-feather="alert-circle" class="w-4 h-4 text-red-600"></i>
-                    <span class="font-semibold text-red-600">High Risk</span>
+            <!-- Critical Risk -->
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <div class="flex items-center gap-2">
+                        <i data-feather="alert-triangle" class="w-4 h-4 text-red-700"></i>
+                        <span class="font-semibold text-red-700">Critical Risk</span>
+                    </div>
+                    <div>
+                        <span class="font-bold text-red-700">{{ $reviews->where('total_score', '<=', 50)->count() }}</span>
+                        ({{ $criticalRisk }}%)
+                    </div>
                 </div>
-                <div><span class="font-bold text-red-600">0</span> (0%)</div>
+                <div class="w-full bg-red-100 h-2 rounded-full">
+                    <div class="bg-red-700 h-2 rounded-full" style="width: {{ $criticalRisk }}%"></div>
+                </div>
             </div>
-            <div class="w-full bg-red-100 h-2 rounded-full">
-                <div class="bg-red-600 h-2 rounded-full" style="width: 0%"></div>
-            </div>
-        </div>
 
-        <!-- Medium Risk -->
-        <div>
-            <div class="flex justify-between items-center mb-1">
-                <div class="flex items-center gap-2">
-                    <i data-feather="alert-octagon" class="w-4 h-4 text-yellow-600"></i>
-                    <span class="font-semibold text-yellow-600">Medium Risk</span>
+            <!-- High Risk -->
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <div class="flex items-center gap-2">
+                        <i data-feather="alert-circle" class="w-4 h-4 text-red-600"></i>
+                        <span class="font-semibold text-red-600">High Risk</span>
+                    </div>
+                    <div>
+                        <span class="font-bold text-red-600">{{ $reviews->filter(fn($r) => $r->total_score > 50 && $r->total_score <= 100)->count() }}</span>
+                        ({{ $highRisk }}%)
+                    </div>
                 </div>
-                <div><span class="font-bold text-yellow-600">1</span> (8%)</div>
+                <div class="w-full bg-red-100 h-2 rounded-full">
+                    <div class="bg-red-600 h-2 rounded-full" style="width: {{ $highRisk }}%"></div>
+                </div>
             </div>
-            <div class="w-full bg-yellow-100 h-2 rounded-full">
-                <div class="bg-yellow-600 h-2 rounded-full" style="width: 8%"></div>
-            </div>
-        </div>
 
-        <!-- Low Risk -->
-        <div>
-            <div class="flex justify-between items-center mb-1">
-                <div class="flex items-center gap-2">
-                    <i data-feather="check-circle" class="w-4 h-4 text-green-600"></i>
-                    <span class="font-semibold text-green-600">Low Risk</span>
+            <!-- Medium Risk -->
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <div class="flex items-center gap-2">
+                        <i data-feather="alert-octagon" class="w-4 h-4 text-yellow-600"></i>
+                        <span class="font-semibold text-yellow-600">Medium Risk</span>
+                    </div>
+                    <div>
+                        <span class="font-bold text-yellow-600">{{ $reviews->filter(fn($r) => $r->total_score > 100 && $r->total_score <= 160)->count() }}</span>
+                        ({{ $mediumRisk }}%)
+                    </div>
                 </div>
-                <div><span class="font-bold text-green-600">2</span> (17%)</div>
+                <div class="w-full bg-yellow-100 h-2 rounded-full">
+                    <div class="bg-yellow-600 h-2 rounded-full" style="width: {{ $mediumRisk }}%"></div>
+                </div>
             </div>
-            <div class="w-full bg-green-100 h-2 rounded-full">
-                <div class="bg-green-600 h-2 rounded-full" style="width: 17%"></div>
+
+            <!-- Low Risk -->
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <div class="flex items-center gap-2">
+                        <i data-feather="check-circle" class="w-4 h-4 text-green-600"></i>
+                        <span class="font-semibold text-green-600">Low Risk</span>
+                    </div>
+                    <div>
+                        <span class="font-bold text-green-600">{{ $reviews->filter(fn($r) => $r->total_score > 160)->count() }}</span>
+                        ({{ $lowRisk }}%)
+                    </div>
+                </div>
+                <div class="w-full bg-green-100 h-2 rounded-full">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: {{ $lowRisk }}%"></div>
+                </div>
             </div>
+
         </div>
-    </div>
+    @endif
 </div>
 
 

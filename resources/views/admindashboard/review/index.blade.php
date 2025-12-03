@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'ROPA Assessments')
+@section('title', 'ROPA Assessment')
 
 @section('content')
 <div class="container mx-auto p-4 sm:p-6">
@@ -138,6 +138,13 @@
                                    class="text-orange-500 hover:text-orange-600 flex items-center gap-1">
                                     <i data-feather="eye" class="w-4 h-4"></i>
                                 </a>
+
+    @if($review->ropa)
+    <a href="{{ route('admin.ropa.export', $review->ropa->id) }}" class="text-green-600 ...">
+        <i data-feather="download" class="w-4 h-4"></i>
+    </a>
+@endif
+
 
                                 <form method="POST" action="{{ route('admin.reviews.destroy', $review->id) }}"
                                       onsubmit="return confirm('Delete this review?')">

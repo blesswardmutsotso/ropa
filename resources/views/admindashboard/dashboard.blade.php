@@ -1,8 +1,14 @@
+
+
+
 @extends('layouts.admin')
 
 @section('title', 'Admin Dashboard')
 
 @section('content')
+
+
+
 <!-- Top Navigation -->
 <nav class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 rounded-xl shadow-sm mb-6">
     <div class="container mx-auto px-4 flex justify-between items-center h-16">
@@ -92,33 +98,65 @@
     <!-- Risk & Activity Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- Risk Distribution -->
+ <!-- Risk Distribution -->
 <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
     <h2 class="text-xl font-bold mb-4 flex items-center">
         <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-orange-500"></i> Risk Distribution
     </h2>
 
-    <div class="space-y-4">
-        @foreach(['Critical Risk', 'High Risk', 'Medium Risk', 'Low Risk'] as $risk)
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
+    @php
+        $riskMap = [
+            'Critical Risk' => isset($criticalRisk) ? $criticalRisk : null,
+            'High Risk'     => isset($highRisk) ? $highRisk : null,
+            'Medium Risk'   => isset($mediumRisk) ? $mediumRisk : null,
+            'Low Risk'      => isset($lowRisk) ? $lowRisk : null,
+        ];
 
-                    @if($risk == 'Critical Risk')
-                        <i data-feather="alert-circle" class="w-4 h-4 text-purple-700"></i>
-                    @elseif($risk == 'High Risk')
-                        <i data-feather="alert-octagon" class="w-4 h-4 text-red-600"></i>
-                    @elseif($risk == 'Medium Risk')
-                        <i data-feather="alert-triangle" class="w-4 h-4 text-yellow-500"></i>
-                    @else
-                        <i data-feather="check-circle" class="w-4 h-4 text-green-600"></i>
-                    @endif
+        $colors = [
+            'Critical Risk' => 'bg-purple-700',
+            'High Risk'     => 'bg-red-600',
+            'Medium Risk'   => 'bg-yellow-500',
+            'Low Risk'      => 'bg-green-600',
+        ];
+    @endphp
 
-                    <span class="font-semibold">{{ $risk }}</span>
+    <div class="space-y-6">
+        @foreach($riskMap as $risk => $value)
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <div class="flex items-center gap-2">
+
+                        @if($risk === 'Critical Risk')
+                            <i data-feather="alert-circle" class="w-4 h-4 text-purple-700"></i>
+                        @elseif($risk === 'High Risk')
+                            <i data-feather="alert-octagon" class="w-4 h-4 text-red-600"></i>
+                        @elseif($risk === 'Medium Risk')
+                            <i data-feather="alert-triangle" class="w-4 h-4 text-yellow-500"></i>
+                        @else
+                            <i data-feather="check-circle" class="w-4 h-4 text-green-600"></i>
+                        @endif
+
+                        <span class="font-semibold">{{ $risk }}</span>
+                    </div>
+
+                    <span class="text-gray-700 dark:text-gray-300">
+                        @if($value === null)
+                            <span class="text-gray-400 italic">No data</span>
+                        @else
+                            {{ $value }}%
+                        @endif
+                    </span>
                 </div>
 
-                <span class="text-gray-700 dark:text-gray-300">
-                    {{ ${str_replace(' ', '', strtolower($risk))} ?? 0 }}%
-                </span>
+                {{-- Progress Bar --}}
+                <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    @if($value !== null)
+                        <div 
+                            class="h-3 {{ $colors[$risk] }} transition-all duration-500"
+                            style="width: {{ $value }}%">
+                        </div>
+                    @endif
+                </div>
             </div>
         @endforeach
     </div>

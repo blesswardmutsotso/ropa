@@ -28,7 +28,7 @@ class UserAccountCreated extends Mailable
      */
     public function build()
     {
-        return $this->subject('Your Account Has Been Created')
-                    ->markdown('emails.created');
+        return $this->subject("Your New Account Details")
+                    ->view('emails.user_account_created');
     }
 }

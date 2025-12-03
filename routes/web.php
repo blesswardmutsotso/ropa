@@ -9,6 +9,7 @@ use App\Http\Controllers\RiskWeightSettingController;
 use App\Http\Controllers\UserActivityController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\RopaIssueController;
 
 
 Route::get('/', function () {
@@ -64,13 +65,27 @@ Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.ve
 Route::post('/2fa/resend', [TwoFactorController::class, 'resend'])->name('2fa.resend');
 
 
+Route::get('/admin/ropas/test/export', function () {
+    // Make sure nothing was sent before output
+    if (ob_get_length()) {
+        ob_clean();
+    }
+
+    return \Spatie\SimpleExcel\SimpleExcelWriter::streamDownload('test.xlsx')
+        ->addRow([
+            'hello' => 'world',
+            'number' => 123,
+        ])
+        ->close();
+});
+
+
 
 
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    
-    
-
+    Route::get('/admin/ropas/{id}/export', [RopaController::class, 'export'])
+    ->name('admin.ropa.export');
 
     // Admin dashboard ROPA list
     Route::get('/admin/ropas', [RopaController::class, 'adminIndex'])
@@ -166,6 +181,60 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/reviews/bulk-action', [AdminReviewController::class, 'bulkAction'])
         ->name('reviews.bulk.action');   // <--- THIS FIXES THE ERROR
 });
+
+
+
+Route::prefix('ticket')->name('ticket.')->group(function () {
+
+    // List all tickets
+    Route::get('/', [RopaIssueController::class, 'index'])->name('index');
+
+    // Create form
+    Route::get('/create', [RopaIssueController::class, 'create'])->name('create');
+
+    // Store ticket
+    Route::post('/', [RopaIssueController::class, 'store'])->name('store');
+
+    // Show ticket
+    Route::get('/{id}', [RopaIssueController::class, 'show'])->name('show');
+
+    // Edit ticket
+    Route::get('/{id}/edit', [RopaIssueController::class, 'edit'])->name('edit');
+
+    // Update ticket
+    Route::put('/{id}', [RopaIssueController::class, 'update'])->name('update');
+
+    // Delete ticket
+    Route::delete('/{id}', [RopaIssueController::class, 'destroy'])->name('destroy');
+
+});
+
+
+
+Route::prefix('admin/tickets')->name('admin.tickets.')->middleware(['auth', 'admin'])->group(function () {
+
+    // List all tickets (pending + resolved)
+    Route::get('/', [RopaIssueController::class, 'index'])->name('index');
+
+    // Show ticket
+    Route::get('/{id}', [RopaIssueController::class, 'show'])->name('show');
+
+    // Edit ticket
+    Route::get('/{id}/edit', [RopaIssueController::class, 'edit'])->name('edit');
+
+    // Update ticket
+    Route::put('/{id}', [RopaIssueController::class, 'update'])->name('update');
+
+    // Delete ticket
+    Route::delete('/{id}', [RopaIssueController::class, 'destroy'])->name('destroy');
+});
+
+
+
+Route::get('/admin/review-risk-dashboard', [App\Http\Controllers\Admin\ReviewController::class, 'reviewRiskDashboard'])
+    ->name('admin.review.risk.dashboard');
+
+
 
 
 

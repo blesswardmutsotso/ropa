@@ -17,14 +17,17 @@ class Review extends Model
         'comment',
         'score',
         'section_scores',
-        'data_processing_agreement',
-        'data_protection_impact_assessment',
+        'data_processing_agreement',  // optional boolean
+        'data_protection_impact_assessment', // optional boolean
+
+        // FILE UPLOAD PATHS
+        'data_processing_agreement_file',
+        'data_protection_impact_assessment_file',
     ];
 
     protected $casts = [
         'section_scores' => 'array',
-        'data_processing_agreement' => 'boolean',
-        'data_protection_impact_assessment' => 'boolean',
+        // Removed boolean casts because now they may contain file paths
     ];
 
     /** Review belongs to a ROPA */

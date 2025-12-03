@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Ropa;
 
+use App\Http\Controllers\Controller;
 use App\Models\UserActivity;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,14 +42,18 @@ class UserActivityController extends Controller
     public function destroy(UserActivity $activity)
     {
         $activity->delete();
-        return redirect()->route('admindashboard.logs.index')->with('success', 'Activity deleted successfully.');
+        return redirect()
+            ->route('admindashboard.logs.index')
+            ->with('success', 'Activity deleted successfully.');
     }
 
     // Export activities to CSV
     public function export()
     {
         $filename = 'user_activities_' . now()->format('Ymd_His') . '.csv';
-        $activities = UserActivity::with('user')->orderBy('created_at', 'desc')->get();
+        $activities = UserActivity::with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $headers = [
             'Content-Type' => 'text/csv',
@@ -57,7 +62,17 @@ class UserActivityController extends Controller
 
         $callback = function () use ($activities) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['ID', 'User', 'Action', 'Model', 'Model ID', 'IP Address', 'Created At']);
+
+            fputcsv($handle, [
+                'ID',
+                'User',
+                'Action',
+                'Model',
+                'Model ID',
+                'IP Address',
+                'Created At'
+            ]);
+
             foreach ($activities as $activity) {
                 fputcsv($handle, [
                     $activity->id,
@@ -69,6 +84,7 @@ class UserActivityController extends Controller
                     $activity->created_at,
                 ]);
             }
+
             fclose($handle);
         };
 
