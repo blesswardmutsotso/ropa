@@ -68,11 +68,15 @@
 
             
     <!-- Help Button at the Bottom -->
-    <div class="mt-auto w-full">
-        <a href="" class="w-full flex items-center justify-center py-3 px-3 mb-2 bg-orange-500 hover:bg-orange-1000 rounded-lg shadow">
-            <i data-feather="help-circle" class="w-5 h-5 mr-2"></i> Help
-        </a>
-    </div>
+   <!-- Help Button at the Bottom -->
+    
+<div class="mt-auto w-full">
+    <a href="{{ route('help') }}" 
+       class="w-full flex items-center justify-center py-3 px-3 mb-2 bg-orange-500 hover:bg-orange-700 rounded-lg shadow">
+        <i data-feather="help-circle" class="w-5 h-5 mr-2"></i> Help
+    </a>
+</div>
+
 
 
 </aside>

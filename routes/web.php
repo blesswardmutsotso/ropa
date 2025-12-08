@@ -156,10 +156,16 @@ Route::get('/activities/export', [UserActivityController::class, 'export'])->nam
 
 
 Route::get('/ropa/{id}/print', [RopaController::class, 'print'])->name('ropa.print');
-
+ Route::get('{ropa}/review', [RopaController::class, 'review'])->name('ropa.review');
 // Handle sending the email (POST)
 Route::post('ropa/{id}/send-email', [RopaController::class, 'sendEmail'])->name('ropa.sendEmail.post');
 Route::patch('/profile/2fa-toggle', [ProfileController::class, 'toggleTwoFactor'])->name('2fa.toggle');
+
+
+
+// Help Page
+Route::get('/help', [App\Http\Controllers\HelpController::class, 'index'])->name('help');
+
 
 // Review routes
 // Review routes

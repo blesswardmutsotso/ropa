@@ -37,18 +37,19 @@ class Ropa extends Model
         'information_shared',
         'sharing_local',
         'sharing_transborder',
+        'sharing_type',
         'local_organizations',
         'transborder_countries',
         'sharing_comment',
         'access_control',
         'access_measures',
         'technical_measures',
+        'technical_measures_other',
         'organisational_measures',
+        'organisational_measures_other',
         'lawful_basis',
+        'lawful_basis_other',
         'risk_report',
-
-        // Add if you want to use risk scoring
-        // 'risk_level',
     ];
 
     protected $casts = [
@@ -67,10 +68,14 @@ class Ropa extends Model
         'retention_rationale' => 'array',
         'local_organizations' => 'array',
         'transborder_countries' => 'array',
+        'sharing_type' => 'array',
         'access_measures' => 'array',
         'technical_measures' => 'array',
+        'technical_measures_other' => 'array',
         'organisational_measures' => 'array',
+        'organisational_measures_other' => 'array',
         'lawful_basis' => 'array',
+        'lawful_basis_other' => 'array',
         'risk_report' => 'array',
         'information_shared' => 'boolean',
         'sharing_local' => 'boolean',
@@ -78,6 +83,9 @@ class Ropa extends Model
         'access_control' => 'boolean',
     ];
 
+    // ---------------------------------------------------
+    // Relationships
+    // ---------------------------------------------------
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -88,6 +96,9 @@ class Ropa extends Model
         return $this->hasMany(Review::class);
     }
 
+    // ---------------------------------------------------
+    // Status helpers
+    // ---------------------------------------------------
     public function isReviewed(): bool
     {
         return $this->status === self::STATUS_REVIEWED;
@@ -98,7 +109,10 @@ class Ropa extends Model
         return $this->status === self::STATUS_PENDING;
     }
 
-    public static function sections()
+    // ---------------------------------------------------
+    // Sections (for risk scoring / reporting)
+    // ---------------------------------------------------
+    public static function sections(): array
     {
         return [
             'organisation_name',
@@ -114,19 +128,25 @@ class Ropa extends Model
             'access_estimate',
             'retention_rationale',
             'information_shared',
+            'sharing_type',
             'local_organizations',
             'transborder_countries',
             'access_control',
             'access_measures',
             'technical_measures',
+            'technical_measures_other',
             'organisational_measures',
+            'organisational_measures_other',
             'lawful_basis',
+            'lawful_basis_other',
             'risk_report',
         ];
     }
 
-    // Safe version — no recursion
-    public function calculateRiskScore()
+    // ---------------------------------------------------
+    // Optional risk scoring
+    // ---------------------------------------------------
+    public function calculateRiskScore(): int
     {
         if (!property_exists($this, 'risk_level') || !$this->risk_level) {
             return 0;
@@ -139,5 +159,33 @@ class Ropa extends Model
             'Low' => 1,
             default => 0,
         };
+    }
+
+    // ---------------------------------------------------
+    // Accessors for convenience
+    // ---------------------------------------------------
+    public function getOtherOrganisationNamesAttribute(): array
+    {
+        return $this->other_organisation_name ?? [];
+    }
+
+    public function getOtherDepartmentNamesAttribute(): array
+    {
+        return $this->other_department ?? [];
+    }
+
+    public function getTechnicalMeasuresOtherAttribute(): array
+    {
+        return $this->technical_measures_other ?? [];
+    }
+
+    public function getOrganisationalMeasuresOtherAttribute(): array
+    {
+        return $this->organisational_measures_other ?? [];
+    }
+
+    public function getLawfulBasisOtherAttribute(): array
+    {
+        return $this->lawful_basis_other ?? [];
     }
 }

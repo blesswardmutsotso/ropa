@@ -6,21 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('ropas', function (Blueprint $table) {
             $table->id();
 
-
+            // User who submitted the ROPA
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
-           // SECTION 1: Organisation Details
+            // -------------------------------
+            // Section 1: Organisation Details
+            // -------------------------------
             $table->string('organisation_name')->nullable();
-            $table->string('other_organisation_name')->nullable();
+            $table->json('other_organisation_name')->nullable(); // multiple other orgs
             $table->string('department')->nullable();
-            $table->string('other_department')->nullable();
+            $table->json('other_department')->nullable(); // multiple other departments
 
-            // SECTION 2: Processing Activity (dynamic arrays stored as JSON)
+            // --------------------------------------
+            // Section 2: Processing Activity Details
+            // --------------------------------------
             $table->json('processes')->nullable();
             $table->json('data_sources')->nullable();
             $table->json('data_sources_other')->nullable();
@@ -35,33 +42,47 @@ return new class extends Migration
             $table->json('access_estimate')->nullable();
             $table->json('retention_rationale')->nullable();
 
-            // SECTION 3: Data Sharing & Outsourcing
+            // -------------------------------
+            // Section 3: Data Sharing
+            // -------------------------------
             $table->boolean('information_shared')->nullable();
-            $table->boolean('sharing_local')->nullable();
-            $table->boolean('sharing_transborder')->nullable();
+            $table->json('sharing_type')->nullable(); // local / transborder
             $table->json('local_organizations')->nullable();
             $table->json('transborder_countries')->nullable();
             $table->text('sharing_comment')->nullable();
 
-            // Access Control Management
+            // -------------------------------
+            // Section 4: Access Control
+            // -------------------------------
             $table->boolean('access_control')->nullable();
             $table->json('access_measures')->nullable();
             $table->json('technical_measures')->nullable();
+            $table->json('technical_measures_other')->nullable();
             $table->json('organisational_measures')->nullable();
+            $table->json('organisational_measures_other')->nullable();
 
-            // Lawful Basis
+            // -------------------------------
+            // Section 5: Lawful Basis
+            // -------------------------------
             $table->json('lawful_basis')->nullable();
+            $table->json('lawful_basis_other')->nullable();
 
-            // SECTION 8: Risk Reporting & Mitigation
-            $table->json('risk_report')->nullable();
+            // -------------------------------
+            // Section 6: Risk Reporting
+            // -------------------------------
+            $table->text('risk_report')->nullable();
 
-
+            // -------------------------------
+            // Status & Timestamps
+            // -------------------------------
             $table->enum('status', ['Pending', 'Reviewed'])->default('Pending');
-            
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('ropas');
