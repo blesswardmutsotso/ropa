@@ -10,6 +10,8 @@ use App\Http\Controllers\UserActivityController;
 use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\RopaIssueController;
+use App\Models\Comment;
+
 
 
 Route::get('/', function () {
@@ -166,31 +168,25 @@ Route::patch('/profile/2fa-toggle', [ProfileController::class, 'toggleTwoFactor'
 // Help Page
 Route::get('/help', [App\Http\Controllers\HelpController::class, 'index'])->name('help');
 
-
-// Review routes
-// Review routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
 
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
-
     Route::get('/reviews/{id}', [AdminReviewController::class, 'show'])->name('reviews.show');
-
     Route::put('/reviews/{id}', [AdminReviewController::class, 'update'])->name('reviews.update');
-
-    Route::put('/reviews/{id}/compliance', [AdminReviewController::class, 'updateCompliance'])
-        ->name('reviews.update.compliance');
-
+    Route::put('/reviews/{id}/compliance', [AdminReviewController::class, 'updateCompliance'])->name('reviews.update.compliance');
     Route::delete('/reviews/{id}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::get('/reviews/export/excel', [AdminReviewController::class, 'exportExcel'])->name('reviews.export.excel');
+    Route::post('/reviews/bulk-action', [AdminReviewController::class, 'bulkAction'])->name('reviews.bulk.action');
 
-    // ⭐ NEW: Export Reviews to Excel (matching your view)
-    Route::get('/reviews/export/excel', [AdminReviewController::class, 'exportExcel'])
-        ->name('reviews.export.excel');
+    // ✅ Add this for comments
+    Route::post('/reviews/{review}/comment', [AdminReviewController::class, 'addComment'])
+        ->name('reviews.addComment');
 
-    // ⭐ REQUIRED: Bulk Delete + Bulk Export route
-    Route::post('/reviews/bulk-action', [AdminReviewController::class, 'bulkAction'])
-        ->name('reviews.bulk.action');   // <--- THIS FIXES THE ERROR
+Route::delete('/reviews/comments/{comment}', [AdminReviewController::class, 'deleteComment'])
+    ->name('reviews.deleteComment'); // NOT admin.reviews.deleteComment
+
+
 });
-
 
 
 Route::prefix('ticket')->name('ticket.')->group(function () {

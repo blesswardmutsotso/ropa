@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use App\Models\Ropa;
+use App\Models\Comment; 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReviewsExport;
 use Illuminate\Http\Request;
@@ -14,21 +15,77 @@ class ReviewController extends Controller
     /**
      * ADMIN: List all reviews
      */
-    public function index()
-    {
-        $reviews = Review::with(['user', 'ropa'])
-            ->latest()
-            ->paginate(10);
+    public function index(Request $request)
+{
+    $query = Review::with(['user', 'ropa']);
 
-        return view('admindashboard.review.index', compact('reviews'));
+    // ---------------------
+    // SEARCH
+    // ---------------------
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+
+        $query->where(function ($qr) use ($search) {
+            $qr->whereHas('user', function ($u) use ($search) {
+                $u->where('name', 'like', "%{$search}%");
+            })
+            ->orWhereHas('ropa', function ($r) use ($search) {
+                $r->where('id', $search);
+            });
+        });
     }
+
+    // ---------------------
+    // FILTERING
+    // ---------------------
+    if ($request->filled('dpa')) {
+        $query->where('data_processing_agreement', $request->dpa);
+    }
+
+    if ($request->filled('dpia')) {
+        $query->where('data_protection_impact_assessment', $request->dpia);
+    }
+
+    // ---------------------
+    // SORTING
+    // ---------------------
+    if ($request->filled('sort')) {
+        switch ($request->sort) {
+            case 'score_high':
+                $query->orderBy('average_score', 'desc');
+                break;
+            case 'score_low':
+                $query->orderBy('average_score', 'asc');
+                break;
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
+    } else {
+        $query->orderBy('created_at', 'desc');
+    }
+
+    // ---------------------
+    // GET RESULTS
+    // ---------------------
+    $reviews = $query->paginate(10)->withQueryString();
+
+    return view('admindashboard.review.index', compact('reviews'));
+}
+
 
     /**
  * ADMIN: Show a specific review
  */
 public function show($id)
 {
-    $review = Review::with(['user', 'ropa'])->findOrFail($id);
+    $review = Review::with([
+        'user',         // the reviewer
+        'ropa',         // associated ROPA
+        'comments.user' // load comments and the users who made them
+    ])->findOrFail($id);
 
     // Ensure section_scores is always an array
     $review->section_scores = is_array($review->section_scores)
@@ -43,6 +100,8 @@ public function show($id)
 
     return view('admindashboard.review.show', compact('review'));
 }
+
+
 
 
     /**
@@ -131,6 +190,29 @@ public function reviewRiskDashboard()
     ));
 }
 
+
+
+
+public function addComment(Request $request, Review $review)
+{
+    $request->validate([
+        'content' => 'required|string|max:1000',
+    ]);
+
+    $review->comments()->create([
+        'user_id' => auth()->id(),   // or null if admin is not authenticated
+        'content' => $request->input('content'),
+    ]);
+
+    return redirect()->back()->with('success', 'Comment added successfully.');
+}
+
+
+public function deleteComment(Comment $comment)
+{
+    $comment->delete(); // soft delete
+    return back()->with('success', 'Comment deleted successfully.');
+}
 
 
 }

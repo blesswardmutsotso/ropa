@@ -42,6 +42,13 @@ class Review extends Model
         return $this->belongsTo(User::class);
     }
 
+
+    // Review has many comments
+public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
+
     /** Total Score = sum of all section scores */
     public function getTotalScoreAttribute()
     {

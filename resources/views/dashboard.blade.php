@@ -283,9 +283,14 @@
                 </p>
             </div>
         @empty
-            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">
-                No recent ROPA submissions found.
-            </p>
+ <p class="text-sm text-gray-700 dark:text-gray-200 text-center flex items-center justify-center space-x-3">
+    <!-- Larger Info Circle Icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-9-3a1 1 0 112 0v2a1 1 0 11-2 0V7zm1 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
+    </svg>
+    <span>No recent ROPA submissions found.</span>
+</p>
+
         @endforelse
     </div>
 </div>
@@ -385,11 +390,18 @@
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-gray-600 dark:text-gray-400">
-                            No ROPA records found.
-                        </td>
-                    </tr>
+                   <tr>
+    <td colspan="5" class="px-4 py-6 text-center text-gray-600 dark:text-gray-400">
+        <div class="flex items-center justify-center space-x-3">
+            <!-- Info / Warning Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-9-3a1 1 0 112 0v2a1 1 0 11-2 0V7zm1 4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd"/>
+            </svg>
+            <span>No ROPA records found.</span>
+        </div>
+    </td>
+</tr>
+
                 @endforelse
             </tbody>
         </table>

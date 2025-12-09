@@ -62,7 +62,7 @@
                 </div>
 
                 <div>
-                    <label class="font-medium">Risk Level</label>
+                    <label class="font-medium">Priority Level</label>
                     <select name="risk_level" class="w-full border rounded p-2" required>
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -253,7 +253,7 @@ function showTab(tab) {
             </div>
 
             <div class="mb-3">
-                <label class="font-medium">Risk Level</label>
+                <label class="font-medium">Priority Level </label>
                 <select name="risk_level" id="editRisk" class="w-full border rounded p-2" required>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>

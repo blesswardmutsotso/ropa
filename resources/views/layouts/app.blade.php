@@ -16,7 +16,7 @@
 
     <div class="flex min-h-screen">
         <!-- Sidebar (FIXED) -->
-        <aside class="w-64 bg-orange-600 text-white p-4 flex flex-col items-center fixed left-0 top-0 h-screen overflow-y-auto">
+      <aside class="w-48 bg-orange-600 text-white p-4 flex flex-col items-center fixed left-0 top-0 h-screen overflow-y-auto">
 
             <!-- Logo -->
             <div class="mb-6">
@@ -83,7 +83,7 @@
 
         <!-- Main Content (shifted right so sidebar does not overlap) -->
         <!-- ★ FIXED HERE: px-0 py-6 (no horizontal padding, vertical padding kept) -->
-        <main class="flex-1 px-0 py-6 overflow-auto ml-64">
+      <main class="flex-1 px-0 py-6 overflow-auto ml-48">
             @yield('content')
         </main>
     </div>
